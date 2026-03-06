@@ -213,7 +213,11 @@ function startPolling() {
                 clearInterval(interval);
                 isPolling = false;
                 if (typeof lucide !== "undefined") lucide.createIcons();
-                // We could also do a redirect or show a 'View Analytics' button here
+                
+                // Redirect to dashboard after showing success
+                setTimeout(() => {
+                    window.location.href = "outreach_dashboard.html";
+                }, 2500);
             } else if (data.status.startsWith("error")) {
                 const errMsg = data.status.replace('error: ', '');
                 statusText.innerHTML = `

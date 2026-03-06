@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OutreachFlow Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  <style>
+    body { font-family: "Inter", sans-serif; background: #f4f5fb; }
+    .panel { background: #fff; border: 1px solid #e8eaf7; border-radius: 14px; }
+    .soft { color: #8a8fa9; }
+    .metric-ring {
+      width: 46px; height: 46px; border-radius: 999px; display: grid; place-items: center;
+      font-size: 11px; font-weight: 700;
+    }
+    .pill { border-radius: 999px; font-size: 10px; font-weight: 700; padding: 2px 8px; }
+    .menu-item.active { color: #6d28d9; background: #f3ecff; }
+    .menu-item { border-radius: 10px; }
+  </style>
+</head>
+<body class="text-[#1b1d2b]">
+  <nav class="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md border-b border-[#e8eaf7] px-6 py-4">
+    <div class="max-w-none mx-auto flex items-center justify-between">
+      <a href="index.html" class="flex items-center gap-2 hover:opacity-80 transition-opacity">
+        <i data-lucide="zap" class="w-6 h-6 text-black fill-black"></i>
+        <span class="text-xl font-bold tracking-tight text-black">OutreachFlow</span>
+      </a>
+      <a href="setup.html" class="px-4 py-2 bg-black text-white rounded-lg text-sm font-bold hover:bg-surface-800 transition-colors flex items-center gap-2">
+        <i data-lucide="plus" class="w-4 h-4"></i> New Campaign
+      </a>
+    </div>
+  </nav>
+
+  <div class="min-h-screen">
+    <main class="p-4 lg:p-6 pt-24">
+      <div class="w-full max-w-none mx-auto">
+        <div class="flex items-center justify-between mb-4">
+          <h1 class="text-xl font-bold">Dashboard</h1>
+          <div class="flex items-center gap-2">
+            <input id="search-box" placeholder="Search" class="h-9 w-56 rounded-lg border border-[#e8eaf7] px-3 text-sm bg-white">
+            <button class="h-9 w-9 rounded-lg bg-violet-600 text-white grid place-items-center"><i data-lucide="search" class="w-4 h-4"></i></button>
+          </div>
+        </div>
+
+        <section class="panel p-3 mb-4">
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-3 text-sm">
+            <label class="block">
+              <span class="text-[11px] soft">Channel</span>
+              <select id="filter-channel" class="mt-1 h-9 w-full rounded-lg border border-[#e8eaf7] px-2 bg-white text-[13px]">
+                <option value="all">All</option>
+              </select>
+            </label>
+            <label class="block">
+              <span class="text-[11px] soft">Campaign</span>
+              <select id="filter-campaign" class="mt-1 h-9 w-full rounded-lg border border-[#e8eaf7] px-2 bg-white text-[13px]">
+                <option value="all">All</option>
+              </select>
+            </label>
+            <label class="block">
+              <span class="text-[11px] soft">Min Lead %</span>
+              <input id="filter-lead" type="number" min="0" max="100" value="0" class="mt-1 h-9 w-full rounded-lg border border-[#e8eaf7] px-2 bg-white text-[13px]">
+            </label>
+            <label class="block">
+              <span class="text-[11px] soft">Time</span>
+              <select id="filter-time" class="mt-1 h-9 w-full rounded-lg border border-[#e8eaf7] px-2 bg-white text-[13px]">
+                <option value="7">Last 7 days</option>
+                <option value="30" selected>Last 30 days</option>
+                <option value="90">Last 90 days</option>
+                <option value="all">All</option>
+              </select>
+            </label>
+          </div>
+        </section>
+
+        <section class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
+          <article class="panel p-4">
+            <div class="flex items-start justify-between">
+              <div>
+                <p class="text-[11px] soft">Total Emails Sent</p>
+                <p id="kpi-emails" class="text-2xl font-extrabold mt-1">0</p>
+                <p class="text-[11px] mt-1 text-emerald-600">+15% vs last window</p>
+              </div>
+              <div class="metric-ring border-4 border-violet-500 text-violet-700">+24%</div>
+            </div>
+          </article>
+          <article class="panel p-4">
+            <div class="flex items-start justify-between">
+              <div>
+                <p class="text-[11px] soft">Total Msg Sents</p>
+                <p id="kpi-msgs" class="text-2xl font-extrabold mt-1">0</p>
+                <p class="text-[11px] mt-1 text-amber-600">+8% vs last window</p>
+              </div>
+              <div class="metric-ring border-4 border-amber-500 text-amber-700">+10%</div>
+            </div>
+          </article>
+          <article class="panel p-4">
+            <div class="flex items-start justify-between">
+              <div>
+                <p class="text-[11px] soft">Lead Converted %</p>
+                <p id="kpi-conv" class="text-2xl font-extrabold mt-1">0%</p>
+                <p class="text-[11px] mt-1 text-rose-600">-3% vs benchmark</p>
+              </div>
+              <div class="metric-ring border-4 border-rose-500 text-rose-700">-4%</div>
+            </div>
+          </article>
+        </section>
+
+        <section class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+          <article class="panel p-4">
+            <div class="flex items-center justify-between mb-2">
+              <h3 class="text-sm font-bold">Statistics Of Active Outreach</h3>
+              <span class="text-[11px] soft">Week</span>
+            </div>
+            <canvas id="bars-canvas" width="620" height="250" class="w-full h-60 bg-[#fafbff] rounded-lg border border-[#eef0fa]"></canvas>
+          </article>
+          <article class="panel p-4">
+            <div class="flex items-center justify-between mb-2">
+              <h3 class="text-sm font-bold">Acquisitions</h3>
+              <span class="text-[11px] soft">Month</span>
+            </div>
+            <div class="space-y-2 text-[12px] mb-3">
+              <div class="flex items-center justify-between"><span class="soft">Applications</span><span id="aq-app">0%</span></div>
+              <div class="h-2 rounded-full bg-[#f1f3fb]"><div id="aq-app-bar" class="h-full rounded-full bg-violet-500" style="width:0%"></div></div>
+              <div class="flex items-center justify-between"><span class="soft">Shortlisted</span><span id="aq-short">0%</span></div>
+              <div class="h-2 rounded-full bg-[#f1f3fb]"><div id="aq-short-bar" class="h-full rounded-full bg-amber-500" style="width:0%"></div></div>
+              <div class="flex items-center justify-between"><span class="soft">Rejected</span><span id="aq-rej">0%</span></div>
+              <div class="h-2 rounded-full bg-[#f1f3fb]"><div id="aq-rej-bar" class="h-full rounded-full bg-rose-500" style="width:0%"></div></div>
+              <div class="flex items-center justify-between"><span class="soft">Finalised</span><span id="aq-fin">0%</span></div>
+              <div class="h-2 rounded-full bg-[#f1f3fb]"><div id="aq-fin-bar" class="h-full rounded-full bg-emerald-500" style="width:0%"></div></div>
+            </div>
+            <div class="text-[12px]">
+              <p><span class="font-semibold">Most Effective Channel:</span> <span id="best-channel">-</span></p>
+              <p><span class="font-semibold">Most Effective Domain:</span> <span id="best-domain">-</span></p>
+            </div>
+          </article>
+        </section>
+
+        <section class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <article class="panel p-4">
+            <div class="flex items-center justify-between mb-2">
+              <h3 class="text-sm font-bold">Trend Analysis</h3>
+              <span id="trend-summary" class="text-[11px] soft"></span>
+            </div>
+            <canvas id="line-canvas" width="620" height="220" class="w-full h-52 bg-[#fafbff] rounded-lg border border-[#eef0fa]"></canvas>
+            <div class="mt-3 text-[12px]">
+              <p><span class="font-semibold">Risk in current campaign:</span> <span id="risk-text">-</span></p>
+              <p><span class="font-semibold">How to overcome:</span> <span id="fix-text">-</span></p>
+              <p><span class="font-semibold">Lead % vs competitors:</span> <span id="comp-gap">-</span></p>
+            </div>
+          </article>
+          <article class="panel p-4">
+            <div class="flex items-center justify-between mb-2">
+              <h3 class="text-sm font-bold">Audience Location Spread</h3>
+              <span class="text-[11px] soft">Live mix</span>
+            </div>
+            <div id="location-list" class="space-y-2 text-[12px] mb-3"></div>
+            <div class="grid grid-cols-3 gap-2 text-center">
+              <div class="panel p-2 bg-[#fafbff]">
+                <p class="soft text-[10px]">Open Rate</p>
+                <p class="font-bold text-[13px]">43.2%</p>
+              </div>
+              <div class="panel p-2 bg-[#fafbff]">
+                <p class="soft text-[10px]">Reply Rate</p>
+                <p class="font-bold text-[13px]">16.4%</p>
+              </div>
+              <div class="panel p-2 bg-[#fafbff]">
+                <p class="soft text-[10px]">Competitor Avg</p>
+                <p id="comp-avg" class="font-bold text-[13px]">18.5%</p>
+              </div>
+            </div>
+          </article>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const data = [
+      { date: "2026-02-07", campaign: "SaaS Founder Outreach", channel: "Email", domain: "saas.io", emails: 120, msgs: 148, leads: 26, converted: 6, location: "USA" },
+      { date: "2026-02-09", campaign: "SaaS Founder Outreach", channel: "LinkedIn", domain: "startuphub.com", emails: 70, msgs: 132, leads: 22, converted: 5, location: "UK" },
+      { date: "2026-02-12", campaign: "Enterprise Pilot Push", channel: "Email", domain: "enterpriseworks.com", emails: 140, msgs: 172, leads: 24, converted: 4, location: "USA" },
+      { date: "2026-02-15", campaign: "AI Ops Outreach", channel: "Email", domain: "cloudscale.ai", emails: 160, msgs: 201, leads: 31, converted: 8, location: "India" },
+      { date: "2026-02-19", campaign: "AI Ops Outreach", channel: "WhatsApp", domain: "devopsdaily.io", emails: 30, msgs: 165, leads: 22, converted: 5, location: "Canada" },
+      { date: "2026-02-22", campaign: "SaaS Founder Outreach", channel: "Email", domain: "foundergrid.com", emails: 110, msgs: 146, leads: 18, converted: 3, location: "Germany" },
+      { date: "2026-02-26", campaign: "Enterprise Pilot Push", channel: "Email", domain: "b2bcentral.org", emails: 155, msgs: 189, leads: 29, converted: 6, location: "UAE" },
+      { date: "2026-03-02", campaign: "AI Ops Outreach", channel: "LinkedIn", domain: "infraops.net", emails: 65, msgs: 218, leads: 38, converted: 10, location: "India" },
+      { date: "2026-03-04", campaign: "SaaS Founder Outreach", channel: "Email", domain: "saas.io", emails: 105, msgs: 137, leads: 16, converted: 2, location: "USA" },
+      { date: "2026-03-05", campaign: "Enterprise Pilot Push", channel: "Email", domain: "enterpriseworks.com", emails: 165, msgs: 208, leads: 35, converted: 9, location: "Singapore" }
+    ];
+    const competitorAvg = 18.5;
+
+    const els = {
+      channel: document.getElementById("filter-channel"),
+      campaign: document.getElementById("filter-campaign"),
+      lead: document.getElementById("filter-lead"),
+      time: document.getElementById("filter-time"),
+      emails: document.getElementById("kpi-emails"),
+      msgs: document.getElementById("kpi-msgs"),
+      conv: document.getElementById("kpi-conv"),
+      bestChannel: document.getElementById("best-channel"),
+      bestDomain: document.getElementById("best-domain"),
+      trendSummary: document.getElementById("trend-summary"),
+      riskText: document.getElementById("risk-text"),
+      fixText: document.getElementById("fix-text"),
+      compGap: document.getElementById("comp-gap"),
+      locationList: document.getElementById("location-list"),
+      aqApp: document.getElementById("aq-app"),
+      aqShort: document.getElementById("aq-short"),
+      aqRej: document.getElementById("aq-rej"),
+      aqFin: document.getElementById("aq-fin"),
+      aqAppBar: document.getElementById("aq-app-bar"),
+      aqShortBar: document.getElementById("aq-short-bar"),
+      aqRejBar: document.getElementById("aq-rej-bar"),
+      aqFinBar: document.getElementById("aq-fin-bar")
+    };
+
+    lucide.createIcons();
+
+    function uniq(arr) { return [...new Set(arr)]; }
+
+    function initFilters() {
+      uniq(data.map(d => d.channel)).forEach(v => {
+        const opt = document.createElement("option");
+        opt.value = v; opt.textContent = v; els.channel.appendChild(opt);
+      });
+      uniq(data.map(d => d.campaign)).forEach(v => {
+        const opt = document.createElement("option");
+        opt.value = v; opt.textContent = v; els.campaign.appendChild(opt);
+      });
+    }
+
+    function filtered() {
+      const now = new Date("2026-03-06");
+      const days = els.time.value === "all" ? null : Number(els.time.value);
+      const minLead = Number(els.lead.value || 0);
+      return data.filter(r => {
+        if (els.channel.value !== "all" && r.channel !== els.channel.value) return false;
+        if (els.campaign.value !== "all" && r.campaign !== els.campaign.value) return false;
+        const leadPct = r.msgs ? (r.leads / r.msgs) * 100 : 0;
+        if (leadPct < minLead) return false;
+        if (days !== null) {
+          const diff = (now - new Date(r.date + "T00:00:00")) / 86400000;
+          if (diff > days) return false;
+        }
+        return true;
+      });
+    }
+
+    function metrics(rows) {
+      const totalEmails = rows.reduce((s, r) => s + r.emails, 0);
+      const totalMsgs = rows.reduce((s, r) => s + r.msgs, 0);
+      const totalLeads = rows.reduce((s, r) => s + r.leads, 0);
+      const totalConv = rows.reduce((s, r) => s + r.converted, 0);
+      const convPct = totalLeads ? (totalConv / totalLeads) * 100 : 0;
+      const leadPct = totalMsgs ? (totalLeads / totalMsgs) * 100 : 0;
+
+      const byChannel = {};
+      const byDomain = {};
+      const byLoc = {};
+      rows.forEach(r => {
+        byChannel[r.channel] ??= { leads: 0, conv: 0 };
+        byDomain[r.domain] ??= { leads: 0, conv: 0 };
+        byLoc[r.location] = (byLoc[r.location] || 0) + r.leads;
+        byChannel[r.channel].leads += r.leads; byChannel[r.channel].conv += r.converted;
+        byDomain[r.domain].leads += r.leads; byDomain[r.domain].conv += r.converted;
+      });
+
+      const bestChannel = Object.entries(byChannel).map(([k, v]) => ({ k, pct: v.leads ? (v.conv / v.leads) * 100 : 0 }))
+        .sort((a, b) => b.pct - a.pct)[0];
+      const bestDomain = Object.entries(byDomain).map(([k, v]) => ({ k, pct: v.leads ? (v.conv / v.leads) * 100 : 0 }))
+        .sort((a, b) => b.pct - a.pct)[0];
+
+      return { totalEmails, totalMsgs, totalLeads, totalConv, convPct, leadPct, byLoc, bestChannel, bestDomain };
+    }
+
+    function risk(m) {
+      if (m.convPct < 18) return {
+        risk: "High conversion risk in current campaign.",
+        fix: "Improve qualification and personalize CTA by segment."
+      };
+      if (m.leadPct < 14) return {
+        risk: "Top funnel weak against current benchmark.",
+        fix: "Refine targeting, test subject lines, and reduce spam-like cadence."
+      };
+      return {
+        risk: "Campaign risk currently low and stable.",
+        fix: "Continue A/B tests and maintain cadence discipline."
+      };
+    }
+
+    function drawBars(rows) {
+      const canvas = document.getElementById("bars-canvas");
+      const ctx = canvas.getContext("2d");
+      const w = canvas.width, h = canvas.height;
+      ctx.clearRect(0, 0, w, h);
+      const sorted = [...rows].sort((a, b) => a.date.localeCompare(b.date)).slice(-7);
+      if (!sorted.length) return;
+      const max = Math.max(...sorted.map(r => r.msgs), 1);
+      const colors = ["#8b5cf6", "#f59e0b", "#fb7185"];
+      sorted.forEach((r, i) => {
+        const x = 60 + i * 76;
+        const emailH = (r.emails / max) * 140;
+        const leadH = (r.leads / max) * 140;
+        const convH = (r.converted / max) * 140;
+        ctx.fillStyle = colors[0]; ctx.fillRect(x, h - 35 - emailH, 8, emailH);
+        ctx.fillStyle = colors[1]; ctx.fillRect(x + 12, h - 35 - leadH, 8, leadH);
+        ctx.fillStyle = colors[2]; ctx.fillRect(x + 24, h - 35 - convH, 8, convH);
+        ctx.fillStyle = "#8a8fa9"; ctx.font = "10px Inter"; ctx.fillText(r.date.slice(5), x - 2, h - 18);
+      });
+    }
+
+    function drawLine(rows) {
+      const canvas = document.getElementById("line-canvas");
+      const ctx = canvas.getContext("2d");
+      const w = canvas.width, h = canvas.height;
+      ctx.clearRect(0, 0, w, h);
+      const sorted = [...rows].sort((a, b) => a.date.localeCompare(b.date));
+      const series = sorted.map(r => r.msgs ? (r.leads / r.msgs) * 100 : 0);
+      if (!series.length) return;
+      const min = Math.min(...series, 0), max = Math.max(...series, 1), range = max - min || 1;
+
+      ctx.strokeStyle = "#ebeefa"; ctx.lineWidth = 1;
+      for (let i = 0; i < 4; i++) {
+        const y = 22 + i * ((h - 44) / 3);
+        ctx.beginPath(); ctx.moveTo(20, y); ctx.lineTo(w - 20, y); ctx.stroke();
+      }
+      ctx.strokeStyle = "#fb7185"; ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      series.forEach((v, i) => {
+        const x = 20 + i * ((w - 40) / Math.max(1, series.length - 1));
+        const y = h - 22 - ((v - min) / range) * (h - 44);
+        if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      });
+      ctx.stroke();
+    }
+
+    function renderLocations(byLoc, totalLeads) {
+      const sorted = Object.entries(byLoc).sort((a, b) => b[1] - a[1]);
+      if (!sorted.length) {
+        els.locationList.innerHTML = `<p class="soft">No location data.</p>`;
+        return;
+      }
+      els.locationList.innerHTML = sorted.map(([name, val], idx) => {
+        const pct = totalLeads ? (val / totalLeads) * 100 : 0;
+        const colors = ["#8b5cf6", "#3b82f6", "#22c55e", "#f59e0b", "#fb7185"];
+        return `
+          <div>
+            <div class="flex items-center justify-between"><span>${idx + 1}. ${name}</span><span class="soft">${pct.toFixed(1)}%</span></div>
+            <div class="h-2 rounded-full bg-[#f1f3fb] mt-1"><div class="h-full rounded-full" style="width:${pct.toFixed(1)}%;background:${colors[idx % colors.length]}"></div></div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function render() {
+      const rows = filtered();
+      const m = metrics(rows);
+      const r = risk(m);
+
+      els.emails.textContent = m.totalEmails.toLocaleString();
+      els.msgs.textContent = m.totalMsgs.toLocaleString();
+      els.conv.textContent = `${m.convPct.toFixed(1)}%`;
+      els.bestChannel.textContent = m.bestChannel ? `${m.bestChannel.k} (${m.bestChannel.pct.toFixed(1)}%)` : "-";
+      els.bestDomain.textContent = m.bestDomain ? `${m.bestDomain.k} (${m.bestDomain.pct.toFixed(1)}%)` : "-";
+
+      const appPct = Math.min(100, (m.totalMsgs / 1800) * 100);
+      const shortPct = Math.min(100, (m.totalLeads / Math.max(1, m.totalMsgs)) * 100);
+      const rejPct = Math.max(0, 100 - shortPct);
+      const finPct = Math.min(100, (m.totalConv / Math.max(1, m.totalLeads)) * 100);
+      els.aqApp.textContent = `${appPct.toFixed(0)}%`;
+      els.aqShort.textContent = `${shortPct.toFixed(0)}%`;
+      els.aqRej.textContent = `${rejPct.toFixed(0)}%`;
+      els.aqFin.textContent = `${finPct.toFixed(0)}%`;
+      els.aqAppBar.style.width = `${appPct.toFixed(0)}%`;
+      els.aqShortBar.style.width = `${shortPct.toFixed(0)}%`;
+      els.aqRejBar.style.width = `${rejPct.toFixed(0)}%`;
+      els.aqFinBar.style.width = `${finPct.toFixed(0)}%`;
+
+      const sorted = [...rows].sort((a, b) => a.date.localeCompare(b.date));
+      const series = sorted.map(x => x.msgs ? (x.leads / x.msgs) * 100 : 0);
+      const delta = series.length > 1 ? series[series.length - 1] - series[0] : 0;
+      els.trendSummary.textContent = delta >= 0 ? `Up ${delta.toFixed(1)} pts` : `Down ${delta.toFixed(1)} pts`;
+      els.riskText.textContent = r.risk;
+      els.fixText.textContent = r.fix;
+      const gap = m.leadPct - competitorAvg;
+      els.compGap.textContent = `${m.leadPct.toFixed(1)}% vs ${competitorAvg.toFixed(1)}% (${gap >= 0 ? "+" : ""}${gap.toFixed(1)} pts)`;
+
+      drawBars(rows);
+      drawLine(rows);
+      renderLocations(m.byLoc, m.totalLeads);
+    }
+
+    [els.channel, els.campaign, els.lead, els.time].forEach(node => {
+      node.addEventListener("change", render);
+      node.addEventListener("input", render);
+    });
+
+    initFilters();
+    render();
+  </script>
+</body>
+</html>
