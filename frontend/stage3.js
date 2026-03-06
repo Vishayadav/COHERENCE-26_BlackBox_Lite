@@ -1,4 +1,4 @@
-const API_BASE = "http://127.0.0.1:8000";
+const API_BASE = "";
 const CONTEXT_KEY = "campaign_context";
 const EMAILS_KEY = "generated_emails_v2";
 
@@ -301,8 +301,7 @@ continueBtn.addEventListener("click", async () => {
 
         alert(`Campaign "${document.getElementById("campaign_name").value}" has been saved and is ready for sending!\nRun ID: ${result.run_id}`);
         
-        // In a real app, we'd navigate to a 'Success' or 'Campaigns' page
-        // window.location.href = "success.html";
+        window.location.href = `stage4.html?run_id=${result.run_id}`;
 
     } catch (err) {
         alert("Error saving campaign: " + err.message);

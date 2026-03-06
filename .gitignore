@@ -1,0 +1,15 @@
+# Python
+__pycache__/
+*.pyc
+venv/
+.env
+
+# Application Storage & Secrets
+backend/storage/token.json
+backend/storage/smtp_config.json
+backend/storage/gmail_activity.log
+client_secret_*.json
+
+# OS files
+.DS_Store
+Thumbs.db
