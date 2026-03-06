@@ -1,0 +1,59 @@
+[
+  {
+    "run_id": 15,
+    "lead_email": "yashviparikh02@gmail.com",
+    "type": "initial_intro",
+    "subject": "Connecting: Yashvi Parikh",
+    "body": "Hi Yashvi Parikh,\n\nI was looking at your recent work and wanted to connect. Would love to hear about what you're focusing on lately.\n\nBest,",
+    "timestamp": "2026-03-06T19:36:37.931073+00:00"
+  },
+  {
+    "run_id": 15,
+    "lead_email": "emily@dataflow.io",
+    "type": "initial_intro",
+    "subject": "Connecting: Emily Chen",
+    "body": "Hi Emily Chen,\n\nI was looking at your recent work and wanted to connect. Would love to hear about what you're focusing on lately.\n\nBest,",
+    "timestamp": "2026-03-06T19:36:38.214979+00:00"
+  },
+  {
+    "run_id": 15,
+    "lead_email": "yashviparikh02@gmail.com",
+    "type": "ai_reply",
+    "subject": "Re: Connecting: Yashvi Parikh",
+    "body": "Hi Yashvi Parikh,\n\nThanks for getting back to me! I appreciate your message. I'd love to show you how najwqnl can help with Sales Prospecting.\n\nWhen would be a good time to catch up briefly?",
+    "incoming_reply": "Sure, I'd be happy to chat.\r\n\r\n\r\n\r\n*Yashvi Parikh*\r\n\r\nOn Sat, 7 Mar 2026, 1:06\u202fam , <ravaniviraj@gmail.com> wrote:\r\n\r\n> Hi Yashvi Parikh,\r\n>\r\n> I was looking at your recent work and wanted to connect. Would love to\r\n> hear about what you're focusing on lately.\r\n>\r\n> Best,",
+    "timestamp": "2026-03-06T19:37:29.037126+00:00"
+  },
+  {
+    "run_id": 15,
+    "lead_email": "emily@dataflow.io",
+    "type": "nurture_followup",
+    "subject": "Quick Follow-up: Emily Chen",
+    "body": "Hi Emily Chen,\n\nJust floating my previous note to the top of your inbox. Let me know if you'd be open to a quick chat when you have a moment.\n\nThanks,",
+    "timestamp": "2026-03-06T19:37:38.285450+00:00"
+  },
+  {
+    "run_id": 15,
+    "lead_email": "emily@dataflow.io",
+    "type": "final_pitch",
+    "subject": "Quick thought for Emily Chen @ DataFlow",
+    "body": "Hi Emily Chen,\n\nI was looking into DataFlow and the great work you're doing in the AI space. I wanted to reach out because we've developed a solution that helps companies like yours achieve Partnership more efficiently.\n\nOur platform majvhw de is designed specifically for teams like yours. Would you be open to a brief 10-minute chat next week to see if we can help DataFlow reach its goals?\n\nBest regards,\n[Alex Corp]",
+    "timestamp": "2026-03-06T19:37:43.465693+00:00"
+  },
+  {
+    "run_id": 15,
+    "lead_email": "yashviparikh02@gmail.com",
+    "type": "cold_outreach",
+    "subject": "Quick thought for Yashvi Parikh @ Acme Corp",
+    "body": "Hi Yashvi Parikh,\n\nI was looking into Acme Corp and the great work you're doing in the SaaS space. I wanted to reach out because we've developed a solution that helps companies like yours achieve Partnership more efficiently.\n\nOur platform majvhw de is designed specifically for teams like yours. Would you be open to a brief 10-minute chat next week to see if we can help Acme Corp reach its goals?\n\nBest regards,\n[Alex Corp]",
+    "timestamp": "2026-03-06T19:38:41.685946+00:00"
+  },
+  {
+    "run_id": 15,
+    "lead_email": "emily@dataflow.io",
+    "type": "cold_outreach",
+    "subject": "Quick thought for Emily Chen @ DataFlow",
+    "body": "Hi Emily Chen,\n\nI was looking into DataFlow and the great work you're doing in the AI space. I wanted to reach out because we've developed a solution that helps companies like yours achieve Partnership more efficiently.\n\nOur platform majvhw de is designed specifically for teams like yours. Would you be open to a brief 10-minute chat next week to see if we can help DataFlow reach its goals?\n\nBest regards,\n[Alex Corp]",
+    "timestamp": "2026-03-06T19:38:41.969316+00:00"
+  }
+]

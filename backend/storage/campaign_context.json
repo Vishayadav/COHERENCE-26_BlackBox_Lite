@@ -207,5 +207,60 @@
     "campaign_goal": "Sales Prospecting",
     "created_at": "2026-03-06T17:06:34.827822+00:00",
     "updated_at": "2026-03-06T17:06:34.827822+00:00"
+  },
+  {
+    "industry": "Ecommerce",
+    "company_name": "Acme Corp",
+    "product_description": "wajnqekn",
+    "target_customer": "Enterprises",
+    "target_geography": "Europe",
+    "outreach_channel": "Email",
+    "campaign_goal": "Lead Generation",
+    "created_at": "2026-03-06T19:00:31.080217+00:00",
+    "updated_at": "2026-03-06T19:00:31.080217+00:00"
+  },
+  {
+    "industry": "Fintech",
+    "company_name": "najwqnl",
+    "product_description": "majvhw de",
+    "target_customer": "SMBs",
+    "target_geography": "North America",
+    "outreach_channel": "Email",
+    "campaign_goal": "Sales Prospecting",
+    "created_at": "2026-03-06T19:02:19.873806+00:00",
+    "updated_at": "2026-03-06T19:02:19.873806+00:00"
+  },
+  {
+    "industry": "Fintech",
+    "company_name": "najwqnl",
+    "product_description": "majvhw de",
+    "target_customer": "SMBs",
+    "target_geography": "North America",
+    "outreach_channel": "Email",
+    "campaign_goal": "Sales Prospecting",
+    "created_at": "2026-03-06T19:21:36.980853+00:00",
+    "updated_at": "2026-03-06T19:21:36.980853+00:00"
+  },
+  {
+    "industry": "Fintech",
+    "company_name": "najwqnl",
+    "product_description": "majvhw de",
+    "target_customer": "SMBs",
+    "target_geography": "North America",
+    "outreach_channel": "Email",
+    "campaign_goal": "Sales Prospecting",
+    "created_at": "2026-03-06T19:29:31.181382+00:00",
+    "updated_at": "2026-03-06T19:29:31.181382+00:00"
+  },
+  {
+    "industry": "Fintech",
+    "company_name": "najwqnl",
+    "product_description": "majvhw de",
+    "target_customer": "SMBs",
+    "target_geography": "North America",
+    "outreach_channel": "Email",
+    "campaign_goal": "Sales Prospecting",
+    "created_at": "2026-03-06T19:33:05.719590+00:00",
+    "updated_at": "2026-03-06T19:33:05.719590+00:00"
   }
 ]

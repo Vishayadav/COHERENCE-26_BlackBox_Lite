@@ -20,8 +20,11 @@ from pydantic import BaseModel, Field
 import base64
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+import email
 import asyncio
 import smtplib
+import imaplib
+import time
 
 app = FastAPI(title="OutreachFlow AI Backend", version="0.1.0")
 
@@ -40,10 +43,12 @@ GENERATED_CSV_DIR = STORAGE_DIR / "generated"
 CAMPAIGN_RUNS_DB = STORAGE_DIR / "campaign_runs.json"
 GMAIL_LOG_FILE = STORAGE_DIR / "gmail_activity.log"
 SMTP_CONFIG_FILE = STORAGE_DIR / "smtp_config.json"
+OUTREACH_LOGS_FILE = STORAGE_DIR / "outreach_logs.json"
 # Progress tracking
 campaign_progress = {} # run_id -> { total: 0, sent: 0, status: "idle" }
 # OAuth state tracking to preserve PKCE code_verifier
 oauth_flows = {} # state -> Flow object
+smtp_semaphore = asyncio.Semaphore(50) # Increased for high-speed burst sending
 
 # Allow insecure transport for local development
 os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
@@ -111,6 +116,13 @@ def _save_json(path, data):
 def _log_gmail(message):
     with open(GMAIL_LOG_FILE, "a") as f:
         f.write(f"[{_now_iso()}] {message}\n")
+
+
+def _log_outreach_json(entry):
+    logs = _load_json(OUTREACH_LOGS_FILE)
+    entry["timestamp"] = _now_iso()
+    logs.append(entry)
+    _save_json(OUTREACH_LOGS_FILE, logs)
 
 
 def _slug_company(company: str) -> str:
@@ -281,8 +293,8 @@ async def upload_leads_csv(file: UploadFile = File(...)) -> dict:
         raise HTTPException(status_code=400, detail="CSV header is missing")
     header_map = _normalize_headers(reader.fieldnames)
 
-    stored = _load_json(LEADS_DB)
-    next_id = len(stored) + 1
+    stored = [] # CLEAR HISTORY: Only send emails that are parsed
+    next_id = 1
     accepted = []
     rejected = []
 
@@ -340,8 +352,8 @@ def generate_leads(payload: LeadGenerationRequest) -> dict:
         generated = _generate_mock_leads(payload)
         fallback_reason = "GOOGLE_MAPS_API_KEY not set in environment"
 
-    stored = _load_json(LEADS_DB)
-    next_id = len(stored) + 1
+    stored = [] # CLEAR HISTORY: Only send emails that are parsed
+    next_id = 1
     records = []
     for lead in generated[: payload.max_results]:
         record = _build_lead(lead, next_id, f"generated_{source}")
@@ -394,7 +406,7 @@ async def generate_emails(payload: EmailGenerationRequest):
     if payload.lead_ids:
         target_leads = [l for l in all_leads if l.get("lead_id") in payload.lead_ids]
     else:
-        target_leads = all_leads[:10] # Default to first 10 for performance
+        target_leads = all_leads[:50] # Increased for better batching
 
     if not target_leads:
         raise HTTPException(status_code=400, detail="No leads selected for generation.")
@@ -547,6 +559,10 @@ async def save_campaign(payload: SaveCampaignRequest):
     runs.append(record)
     _save_json(CAMPAIGN_RUNS_DB, runs)
     
+    # Clear historical outreach logs on new campaign save
+    if OUTREACH_LOGS_FILE.exists():
+        _save_json(OUTREACH_LOGS_FILE, [])
+        
     # Initialize progress
     campaign_progress[record["run_id"]] = {
         "total": len(payload.emails),
@@ -613,7 +629,129 @@ def _send_email_sync(config, to, subject, body):
 
 
 async def _send_email(config, to, subject, body):
-    return await asyncio.to_thread(_send_email_sync, config, to, subject, body)
+    async with smtp_semaphore:
+        return await asyncio.to_thread(_send_email_sync, config, to, subject, body)
+
+
+async def _poll_for_reply(config, target_email, timeout_seconds=180):
+    """
+    Polls the IMAP inbox for an UNSEEN email from target_email.
+    Returns the body text if found, else None.
+    """
+    _log_gmail(f"STARTING POLL: Waiting for reply from {target_email} (timeout: {timeout_seconds}s)")
+    
+    # We assume GMail if not specified, or we could derive from host
+    host = "imap.gmail.com"
+    if "outlook" in config["smtp_host"].lower(): host = "outlook.office365.com"
+    
+    user = config["smtp_user"]
+    password = config["smtp_pass"]
+    
+    start_time = time.time()
+    while time.time() - start_time < timeout_seconds:
+        try:
+            # We run this in a thread to not block the event loop
+            found_text = await asyncio.to_thread(_check_imap_sync, host, user, password, target_email)
+            if found_text:
+                _log_gmail(f"REPLY DETECTED: from {target_email}")
+                return found_text
+        except Exception as e:
+            _log_gmail(f"POLL ERROR: {str(e)}")
+            
+        await asyncio.sleep(10) # Wait 10 seconds between checks
+    
+    _log_gmail(f"POLL TIMEOUT: No reply from {target_email}")
+    return None
+
+
+def _check_imap_sync(host, user, password, target_email):
+    try:
+        mail = imaplib.IMAP4_SSL(host)
+        mail.login(user, password)
+        mail.select("inbox")
+        
+        # Search for unseen messages from the target email
+        status, messages = mail.search(None, f'(FROM "{target_email}") UNSEEN')
+        if status == "OK" and messages[0]:
+            # Get the most recent one
+            latest_id = messages[0].split()[-1]
+            status, data = mail.fetch(latest_id, "(RFC822)")
+            raw_msg = data[0][1]
+            msg = email.message_from_bytes(raw_msg)
+            
+            # Extract body
+            body = ""
+            if msg.is_multipart():
+                for part in msg.walk():
+                    content_type = part.get_content_type()
+                    content_disposition = str(part.get("Content-Disposition"))
+                    if content_type == "text/plain" and "attachment" not in content_disposition:
+                        body = part.get_payload(decode=True).decode()
+                        break
+            else:
+                body = msg.get_payload(decode=True).decode()
+                
+            mail.logout()
+            return body.strip()
+            
+        mail.logout()
+    except Exception as e:
+        print(f"IMAP Sync Check Error: {e}")
+        
+    return None
+
+
+async def _generate_ai_chat_response(lead_data, incoming_text, campaign_ctx):
+    """
+    Uses Gemini to understand the reply and generate a human-touch response pitching the product.
+    """
+    api_key = "AIzaSyCLIwNcHmJs2q9uJAjexANFbW1ow_MnsS4"
+    host = "generativelanguage.googleapis.com"
+    endpoint = f"/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
+    
+    # Ensure lead_data has metadata (fallback if missing)
+    lead_name = lead_data.get("name", "there")
+    lead_company = lead_data.get("company", "your company")
+    lead_industry = lead_data.get("industry", "your field")
+    
+    prompt = (
+        f"You are a senior sales partner at {campaign_ctx.get('company_name', 'our company')}. "
+        f"You are talking to {lead_name} who works at {lead_company} in the {lead_industry} industry. "
+        f"Our Product: {campaign_ctx.get('product_description', 'Advanced Outreach Tool')}. "
+        f"Our Value Proposition: {campaign_ctx.get('value_proposition', 'Increase outreach efficiency by 400%')}. "
+        f"Our Goal: {campaign_ctx.get('campaign_goal', 'Book a demo')}.\n\n"
+        f"They just replied to our cold intro with: \"{incoming_text}\"\n\n"
+        "INSTRUCTIONS:\n"
+        "1. Acknowledge their message warmly and maintain a very human, helpful touch.\n"
+        "2. Do NOT use corporate jargon or sound robotic.\n"
+        "3. Bridge their response back to why our product is relevant to their business/needs.\n"
+        "4. Transition into pitching the product and ask for a quick chat/call as per our goal.\n"
+        "5. Keep the response under 100 words.\n\n"
+        "Generate ONLY the subject and body in the following JSON format: {\"subject\": \"...\", \"body\": \"...\"}"
+    )
+    
+    request_body = json.dumps({
+        "contents": [{"parts": [{"text": prompt}]}]
+    })
+    
+    conn = http.client.HTTPSConnection(host)
+    try:
+        conn.request("POST", endpoint, body=request_body, headers={"Content-Type": "application/json"})
+        response = conn.getresponse()
+        data = response.read().decode("utf-8")
+        conn.close()
+        
+        resp_json = json.loads(data)
+        raw_text = resp_json['candidates'][0]['content']['parts'][0]['text']
+        raw_text = raw_text.replace("```json", "").replace("```", "").strip()
+        return json.loads(raw_text)
+    except Exception as e:
+        _log_gmail(f"AI RESPONSE ERROR: {str(e)}")
+        # Simple fallback
+        return {
+            "subject": f"Re: Connecting: {lead_name}",
+            "body": f"Hi {lead_name},\n\nThanks for getting back to me! I appreciate your message. I'd love to show you how {campaign_ctx.get('company_name')} can help with {campaign_ctx.get('campaign_goal')}.\n\nWhen would be a good time to catch up briefly?"
+        }
 
 
 @app.post("/api/campaign/launch/{run_id}")
@@ -636,45 +774,125 @@ async def launch_campaign(run_id: int, workflow: str = "cold-email"):
     
     campaign_progress[run_id] = {"total": total_emails, "sent": 0, "status": "sending"}
     
+    # Get last campaign context for AI generation
+    contexts = _load_json(CAMPAIGN_DB)
+    campaign_ctx = contexts[-1] if contexts else {}
+    
     # Start background task for sending
-    asyncio.create_task(_process_bulk_send(run_id, config, run["emails"], workflow))
+    asyncio.create_task(_process_bulk_send(run_id, config, run["emails"], workflow, campaign_ctx))
     
     return {"message": "Launched via SMTP", "run_id": run_id, "workflow": workflow}
 
 
-async def _process_bulk_send(run_id, config, emails, workflow):
+async def _process_bulk_send(run_id, config, emails, workflow, campaign_ctx):
+    tasks = []
     for email_data in emails:
-        try:
-            if workflow == "nurture":
-                # Step 1: Soft intro
-                intro_subject = f"Connecting: {email_data['name']}"
-                intro_body = f"Hi {email_data['name']},\n\nI was looking at your recent work and wanted to connect. Would love to hear about what you're focusing on lately.\n\nBest,"
-                await _send_email(config, email_data["email"], intro_subject, intro_body)
-                campaign_progress[run_id]["sent"] += 1
-                await asyncio.sleep(2) # Simulate delay of a couple days
-                
-                # Step 2: Nurture follow-up
-                followup_subject = f"Re: {intro_subject}"
-                followup_body = f"Hi {email_data['name']},\n\nJust floating this to the top of your inbox. Let me know if you'd be open to a quick chat when you have a moment.\n\nThanks,"
-                await _send_email(config, email_data["email"], followup_subject, followup_body)
-                campaign_progress[run_id]["sent"] += 1
-                await asyncio.sleep(2) # Simulate delay
-                
-                # Step 3: AI-Generated Pitch
-                await _send_email(config, email_data["email"], email_data["subject"], email_data["body"])
-                campaign_progress[run_id]["sent"] += 1
-                await asyncio.sleep(1)
-            else:
-                # Default "cold-email" single send
-                await _send_email(config, email_data["email"], email_data["subject"], email_data["body"])
-                campaign_progress[run_id]["sent"] += 1
-                await asyncio.sleep(1) # Slightly faster than GMail
-        except Exception as e:
-            _log_gmail(f"CRITICAL: Bulk send error at {email_data['email']}: {e}")
-            campaign_progress[run_id]["status"] = f"error: {str(e)}"
-            return
-            
+        # We spawn a task for each lead to ensure "no delays" between starting bulk emails
+        tasks.append(asyncio.create_task(_process_single_lead(run_id, config, email_data, workflow, campaign_ctx)))
+    
+    # Wait for all leads to finish their respective workflows
+    await asyncio.gather(*tasks, return_exceptions=True)
     campaign_progress[run_id]["status"] = "completed"
+
+
+async def _process_single_lead(run_id, config, email_data, workflow, campaign_ctx):
+    try:
+        # Enrich lead data with full metadata if missing
+        lead_id = email_data.get("lead_id")
+        full_leads = _load_json(LEADS_DB)
+        full_lead = next((l for l in full_leads if l.get("lead_id") == lead_id), {})
+        
+        # Merge - priority to full_lead metadata, but keep email_data's specific subject/body
+        process_data = {**full_lead, **email_data}
+        
+        if workflow == "nurture":
+            # Step 1: Soft intro
+            intro_subject = f"Connecting: {process_data.get('name', 'there')}"
+            intro_body = f"Hi {process_data.get('name', 'there')},\n\nI was looking at your recent work and wanted to connect. Would love to hear about what you're focusing on lately.\n\nBest,"
+            await _send_email(config, process_data["email"], intro_subject, intro_body)
+            
+            _log_outreach_json({
+                "run_id": run_id,
+                "lead_email": process_data["email"],
+                "type": "initial_intro",
+                "subject": intro_subject,
+                "body": intro_body
+            })
+            
+            campaign_progress[run_id]["sent"] = int(campaign_progress[run_id]["sent"]) + 1
+            
+            # 45 SECONDS DELAY for follow-up to the same person
+            _log_gmail(f"Waiting 45s for nurture follow-up for {process_data['email']}")
+            await asyncio.sleep(45)
+            
+            # Step 2: Poll for reply
+            reply_text = await _poll_for_reply(config, process_data["email"], timeout_seconds=10)
+            
+            if reply_text:
+                # Step 3a: AI Understands and Responds
+                try:
+                    ai_reply_dict = await _generate_ai_chat_response(process_data, reply_text, campaign_ctx)
+                    await _send_email(config, process_data["email"], ai_reply_dict.get("subject", ""), ai_reply_dict.get("body", ""))
+                    
+                    _log_outreach_json({
+                        "run_id": run_id,
+                        "lead_email": process_data["email"],
+                        "type": "ai_reply",
+                        "subject": str(ai_reply_dict.get("subject", "")),
+                        "body": str(ai_reply_dict.get("body", "")),
+                        "incoming_reply": reply_text
+                    })
+                    
+                    if run_id in campaign_progress:
+                        campaign_progress[run_id]["sent"] = int(campaign_progress[run_id]["sent"]) + 1
+                except Exception as ae:
+                    _log_gmail(f"AI response task failed for {process_data['email']}: {ae}")
+            else:
+                # Step 3b: Fallback Nurture Flow - CLEAN SLATE (No 'Re:' prefix to avoid history)
+                followup_subject = intro_subject.replace("Connecting:", "Quick Follow-up:")
+                followup_body = f"Hi {process_data.get('name', 'there')},\n\nJust floating my previous note to the top of your inbox. Let me know if you'd be open to a quick chat when you have a moment.\n\nThanks,"
+                await _send_email(config, process_data["email"], followup_subject, followup_body)
+                
+                _log_outreach_json({
+                    "run_id": run_id,
+                    "lead_email": process_data["email"],
+                    "type": "nurture_followup",
+                    "subject": followup_subject,
+                    "body": followup_body
+                })
+                
+                if run_id in campaign_progress:
+                    campaign_progress[run_id]["sent"] = int(campaign_progress[run_id]["sent"]) + 1
+                
+                # Final Pitch if still no response
+                await asyncio.sleep(2)
+                await _send_email(config, process_data["email"], process_data["subject"], process_data["body"])
+                
+                _log_outreach_json({
+                    "run_id": run_id,
+                    "lead_email": process_data["email"],
+                    "type": "final_pitch",
+                    "subject": process_data["subject"],
+                    "body": process_data["body"]
+                })
+                
+                campaign_progress[run_id]["sent"] = int(campaign_progress[run_id]["sent"]) + 1
+        else:
+            # Default "cold-email" single send - NO DELAY
+            await _send_email(config, process_data["email"], process_data["subject"], process_data["body"])
+            
+            _log_outreach_json({
+                "run_id": run_id,
+                "lead_email": process_data["email"],
+                "type": "cold_outreach",
+                "subject": process_data["subject"],
+                "body": process_data["body"]
+            })
+            
+            campaign_progress[run_id]["sent"] = int(campaign_progress[run_id]["sent"]) + 1
+    except Exception as e:
+        _log_gmail(f"CRITICAL: Task error for {email_data.get('email', 'unknown')}: {e}")
+        # Mark as errored but don't stop the loop
 
 
 @app.get("/api/campaign/status/{run_id}")
