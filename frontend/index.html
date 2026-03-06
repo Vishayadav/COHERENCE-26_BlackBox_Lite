@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OutreachFlow AI - Phase 1</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body class="page-shell min-h-screen text-slate-100">
+  <main class="mx-auto max-w-6xl px-5 py-8 md:px-8 md:py-12">
+    <section id="landing" class="panel animate-rise overflow-hidden rounded-3xl p-8 md:p-12">
+      <div class="pointer-events-none absolute inset-0 opacity-50">
+        <div class="gold-orb"></div>
+      </div>
+      <div class="relative z-10">
+        <p class="eyebrow">OutreachFlow AI</p>
+        <h1 class="hero-title mt-4 max-w-4xl text-4xl leading-tight md:text-6xl">
+          Intelligent Outreach Workflow Automation
+        </h1>
+        <p class="mt-5 max-w-2xl text-base text-slate-200 md:text-lg">
+          Build credible outbound campaigns with context-aware personalization and controlled execution.
+        </p>
+        <div class="mt-8 flex flex-wrap items-center gap-4">
+          <button
+            id="startAutomationBtn"
+            class="gold-btn rounded-xl px-7 py-3 font-bold transition"
+          >
+            Start Automation
+          </button>
+          <span class="text-sm text-slate-300">Phase 1: Campaign context capture</span>
+        </div>
+      </div>
+    </section>
+
+    <section id="formSection" class="panel animate-rise mt-8 hidden rounded-3xl p-7 md:p-10">
+      <div class="flex flex-wrap items-end justify-between gap-4 border-b border-[color:var(--line)] pb-5">
+        <div>
+          <h2 class="section-title text-2xl md:text-3xl">Campaign Context</h2>
+          <p class="mt-2 text-sm text-slate-300">Fill campaign details to generate your context object.</p>
+        </div>
+      </div>
+
+      <form id="campaignForm" class="mt-6 grid grid-cols-1 gap-5 md:grid-cols-2">
+        <label class="block">
+          <span class="label">Industry</span>
+          <select id="industry" class="input" required>
+            <option value="">Select industry</option>
+            <option>SaaS</option>
+            <option>FinTech</option>
+            <option>HealthTech</option>
+            <option>E-commerce</option>
+            <option>AI / ML</option>
+            <option>Other</option>
+          </select>
+        </label>
+
+        <label class="block">
+          <span class="label">Company Name</span>
+          <input id="companyName" class="input" type="text" placeholder="XYZ Tech" required />
+        </label>
+
+        <label class="block md:col-span-2">
+          <span class="label">Product / Service Description</span>
+          <textarea id="productDescription" class="input min-h-[96px]" placeholder="Describe your product..." required></textarea>
+        </label>
+
+        <label class="block">
+          <span class="label">Target Customer Type</span>
+          <select id="targetCustomerType" class="input" required>
+            <option value="">Select target customer</option>
+            <option>Startups</option>
+            <option>SMBs</option>
+            <option>Enterprise</option>
+            <option>Recruiters</option>
+            <option>Agencies</option>
+          </select>
+        </label>
+
+        <label class="block">
+          <span class="label">Campaign Goal</span>
+          <select id="campaignGoal" class="input" required>
+            <option value="">Select campaign goal</option>
+            <option>Lead Generation</option>
+            <option>Sales Prospecting</option>
+            <option>Partnership Outreach</option>
+            <option>Recruitment Outreach</option>
+          </select>
+        </label>
+
+        <label class="block md:col-span-2">
+          <span class="label">Target Geography (optional)</span>
+          <select id="targetGeography" class="input min-h-[120px]" multiple>
+            <option>Global</option>
+            <option>USA</option>
+            <option>Canada</option>
+            <option>UK</option>
+            <option>Europe</option>
+            <option>India</option>
+            <option>APAC</option>
+          </select>
+          <p class="mt-1 text-xs text-slate-400">Hold Ctrl/Cmd to select multiple regions.</p>
+        </label>
+
+        <label class="block md:col-span-2">
+          <span class="label">Preferred Outreach Channel</span>
+          <input id="preferredChannel" class="input" type="text" value="Email" readonly />
+        </label>
+
+        <div class="md:col-span-2 flex flex-wrap items-center gap-4 pt-2">
+          <button
+            type="submit"
+            class="gold-btn rounded-xl px-6 py-3 font-bold transition"
+          >
+            Save Campaign Context
+          </button>
+          <span id="statusText" class="text-sm text-slate-300"></span>
+        </div>
+      </form>
+
+      <div class="mt-8">
+        <h3 class="section-title text-xl">Saved Context Object</h3>
+        <pre id="contextPreview" class="preview-box mt-3 overflow-auto rounded-xl p-4 text-sm">{}</pre>
+      </div>
+    </section>
+  </main>
+
+  <script src="./app.js"></script>
+</body>
+</html>
