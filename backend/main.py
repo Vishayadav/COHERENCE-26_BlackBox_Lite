@@ -4,6 +4,7 @@ import csv
 import json
 import os
 import re
+import http.client
 from datetime import datetime, timezone
 from io import StringIO
 from pathlib import Path
@@ -628,8 +629,12 @@ async def launch_campaign(run_id: int, workflow: str = "cold-email"):
     
     with open(SMTP_CONFIG_FILE, "r") as f:
         config = json.load(f)
+        
+    total_emails = len(run["emails"])
+    if workflow == "nurture":
+        total_emails = len(run["emails"]) * 3
     
-    campaign_progress[run_id] = {"total": len(run["emails"]), "sent": 0, "status": "sending"}
+    campaign_progress[run_id] = {"total": total_emails, "sent": 0, "status": "sending"}
     
     # Start background task for sending
     asyncio.create_task(_process_bulk_send(run_id, config, run["emails"], workflow))
@@ -638,12 +643,32 @@ async def launch_campaign(run_id: int, workflow: str = "cold-email"):
 
 
 async def _process_bulk_send(run_id, config, emails, workflow):
-    for idx, email_data in enumerate(emails):
+    for email_data in emails:
         try:
-            await _send_email(config, email_data["email"], email_data["subject"], email_data["body"])
-            
-            campaign_progress[run_id]["sent"] = idx + 1
-            await asyncio.sleep(1) # Slightly faster than GMail
+            if workflow == "nurture":
+                # Step 1: Soft intro
+                intro_subject = f"Connecting: {email_data['name']}"
+                intro_body = f"Hi {email_data['name']},\n\nI was looking at your recent work and wanted to connect. Would love to hear about what you're focusing on lately.\n\nBest,"
+                await _send_email(config, email_data["email"], intro_subject, intro_body)
+                campaign_progress[run_id]["sent"] += 1
+                await asyncio.sleep(2) # Simulate delay of a couple days
+                
+                # Step 2: Nurture follow-up
+                followup_subject = f"Re: {intro_subject}"
+                followup_body = f"Hi {email_data['name']},\n\nJust floating this to the top of your inbox. Let me know if you'd be open to a quick chat when you have a moment.\n\nThanks,"
+                await _send_email(config, email_data["email"], followup_subject, followup_body)
+                campaign_progress[run_id]["sent"] += 1
+                await asyncio.sleep(2) # Simulate delay
+                
+                # Step 3: AI-Generated Pitch
+                await _send_email(config, email_data["email"], email_data["subject"], email_data["body"])
+                campaign_progress[run_id]["sent"] += 1
+                await asyncio.sleep(1)
+            else:
+                # Default "cold-email" single send
+                await _send_email(config, email_data["email"], email_data["subject"], email_data["body"])
+                campaign_progress[run_id]["sent"] += 1
+                await asyncio.sleep(1) # Slightly faster than GMail
         except Exception as e:
             _log_gmail(f"CRITICAL: Bulk send error at {email_data['email']}: {e}")
             campaign_progress[run_id]["status"] = f"error: {str(e)}"

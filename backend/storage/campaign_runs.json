@@ -96,5 +96,47 @@
     ],
     "run_id": 7,
     "created_at": "2026-03-06T15:08:03.491721+00:00"
+  },
+  {
+    "campaign_name": "AI SAAS",
+    "emails": [
+      {
+        "lead_id": 1,
+        "name": "Alex Lee",
+        "email": "alex@ecommercecompetitorlabs1.com",
+        "subject": "Quick thought for Alex Lee @ Ecommerce Competitor Labs 1",
+        "body": "Hi Alex Lee,\n\nI was looking into Ecommerce Competitor Labs 1 and the great work you're doing in the Ecommerce space. I wanted to reach out because we've developed a solution that helps companies like yours achieve Partnership more efficiently.\n\nOur platform sbhd is designed specifically for teams like yours. Would you be open to a brief 10-minute chat next week to see if we can help Ecommerce Competitor Labs 1 reach its goals?\n\nBest regards,\n[Alex Corp]"
+      }
+    ],
+    "run_id": 8,
+    "created_at": "2026-03-06T16:54:14.686903+00:00"
+  },
+  {
+    "campaign_name": "Unnamed Campaign",
+    "emails": [
+      {
+        "lead_id": 1,
+        "name": "Alex Lee",
+        "email": "alex@ecommercecompetitorlabs1.com",
+        "subject": "Alex Lee, let's connect!",
+        "body": "Hi Alex Lee,\n\nReaching out from the team. We've been following Ecommerce Competitor Labs 1 and are impressed by your growth in Ecommerce. \n\nWe would love to partner with you to help with Partnership. Our value proposition is simple: qjvh. \n\nAre you the right person to speak with about this, or should I be reaching out to someone else on your team?\n\nCheers,\n[Alex Corp]"
+      }
+    ],
+    "run_id": 9,
+    "created_at": "2026-03-06T17:03:31.794837+00:00"
+  },
+  {
+    "campaign_name": "Unnamed Campaign",
+    "emails": [
+      {
+        "lead_id": 1,
+        "name": "Alex Lee",
+        "email": "alex@ecommercecompetitorlabs1.com",
+        "subject": "Alex Lee, let's connect!",
+        "body": "Hi Alex Lee,\n\nReaching out from the team. We've been following Ecommerce Competitor Labs 1 and are impressed by your growth in Ecommerce. \n\nWe would love to partner with you to help with Partnership. Our value proposition is simple: qjvh. \n\nAre you the right person to speak with about this, or should I be reaching out to someone else on your team?\n\nCheers,\n[Alex Corp]"
+      }
+    ],
+    "run_id": 10,
+    "created_at": "2026-03-06T17:10:15.613900+00:00"
   }
 ]
