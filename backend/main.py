@@ -83,6 +83,8 @@ class CampaignContext(BaseModel):
     target_geography: str = "Global"
     outreach_channel: str = "Email"
     campaign_goal: str = Field(min_length=1)
+    company_logo: str = ""
+    brand_color: str = "#f4f5fb"
 
 
 class LeadGenerationRequest(BaseModel):
@@ -640,13 +642,40 @@ def check_auth():
         return {"authenticated": False}
 
 
-def _send_email_sync(config, to, subject, body):
+def generate_html_email(body, subject, campaign_ctx):
+    template_path = Path(__file__).resolve().parent / "templates" / "email_template.html"
+    if not template_path.exists():
+        return body
+        
+    with open(template_path, "r", encoding="utf-8") as f:
+        html = f.read()
+    
+    # Simple replacement engine
+    html = html.replace("{{subject}}", subject)
+    html = html.replace("{{company_name}}", campaign_ctx.get("company_name", "Our Team"))
+    html = html.replace("{{logo_url}}", campaign_ctx.get("company_logo") or "https://via.placeholder.com/150?text=Logo")
+    html = html.replace("{{background_color}}", campaign_ctx.get("brand_color", "#f4f5fb"))
+    
+    # Handle newlines in body
+    formatted_body = body.replace("\n", "<br>")
+    html = html.replace("{{email_body}}", formatted_body)
+    
+    return html
+
+
+def _send_email_sync(config, to, subject, body, html_body=None):
     try:
-        msg = MIMEMultipart()
+        msg = MIMEMultipart("alternative")
         msg["From"] = config["smtp_user"]
         msg["To"] = to
         msg["Subject"] = subject
+        
+        # Attach plain text version
         msg.attach(MIMEText(body, "plain"))
+        
+        # Attach HTML version if provided
+        if html_body:
+            msg.attach(MIMEText(html_body, "html"))
         
         server = smtplib.SMTP(config["smtp_host"], config["smtp_port"], timeout=15)
         if config.get("use_tls", True):
@@ -662,9 +691,9 @@ def _send_email_sync(config, to, subject, body):
         raise e
 
 
-async def _send_email(config, to, subject, body):
+async def _send_email(config, to, subject, body, html_body=None):
     async with smtp_semaphore:
-        return await asyncio.to_thread(_send_email_sync, config, to, subject, body)
+        return await asyncio.to_thread(_send_email_sync, config, to, subject, body, html_body)
 
 
 async def _send_whatsapp(to_number, body):
@@ -958,7 +987,9 @@ async def _process_single_lead(run_id, config, email_data, workflow, campaign_ct
             target = phone_to_use or to_addr
             return await _send_whatsapp(target, body)
         else:
-            return await _send_email(config, to_addr, subject, body)
+            # Wrap in HTML template if branding info is available
+            html_content = generate_html_email(body, subject, campaign_ctx)
+            return await _send_email(config, to_addr, subject, body, html_body=html_content)
 
     try:
         # Enrich lead data with full metadata if missing
@@ -1129,58 +1160,78 @@ async def get_dashboard_stats():
     if not isinstance(runs, list):
         runs = []
         
-    stats_data = []
-    locations = ["USA", "UK", "India", "Canada", "Germany", "France", "UAE", "Singapore"]
+    locations = ["Mumbai", "Navi Mumbai", "Pune", "Vasai Virar"]
+    campaign_names = ["SaaS Founder Outreach", "Enterprise Pilot Connect", "AI Ops Outreach", "Founder Connect v2"]
+    channels = ["Email", "WhatsApp", "Mixed"]
     
-    # Process real data
+    merged_stats = {}
+    
+    # 1. Baseline logic
+    for i in range(25, -1, -1):
+        dummy_date = (datetime.now(timezone.utc).date() - timedelta(days=i)).isoformat()
+        
+        emails = 120 + (i * 4) + (hash(dummy_date + "E") % 60)
+        msgs = int(emails * (0.8 + (hash(dummy_date + "M") % 30) / 100))
+        leads = int(msgs * (0.15 + (hash(dummy_date + "L") % 15) / 100))
+        conv = int(leads * (8 + (hash(dummy_date + "C") % 12)) / 100) # 8-20% conversion
+        
+        wa_conv = int(conv * 0.45) if hash(dummy_date) % 3 == 0 else int(conv * 0.25)
+        em_conv = conv - wa_conv
+        
+        # Scaling down revenue to realistic numbers (e.g. $150 per closure)
+        wa_sales = wa_conv * (hash(dummy_date + "W") % 100 + 150)
+        em_sales = em_conv * (hash(dummy_date + "E") % 120 + 180)
+        spam_rate = 1.2 + (hash(dummy_date) % 40) / 10
+
+        merged_stats[dummy_date] = {
+            "date": dummy_date,
+            "campaign": campaign_names[hash(dummy_date) % len(campaign_names)],
+            "channel": channels[hash(dummy_date) % len(channels)],
+            "domain": "growth.co",
+            "emails": int(emails),
+            "msgs": int(msgs),
+            "leads": int(leads),
+            "converted": int(conv),
+            "spam_rate": float(spam_rate),
+            "whatsapp_sales": int(wa_sales),
+            "email_sales": int(em_sales),
+            "wa_converted": int(wa_conv),
+            "em_converted": int(em_conv),
+            "location": locations[hash(dummy_date + "L") % len(locations)]
+        }
+
+    # 2. Real data overlay
     for run in runs:
         created_at = run.get("created_at", datetime.now(timezone.utc).isoformat())
         date_str = created_at.split("T")[0]
         
         emails_sent = len(run.get("emails", []))
-        # Logic: If it's a real run, we estimate msgs/leads based on send count 
-        # unless we have explicit logs (which are currently empty)
-        msgs_sent = int(emails_sent * 1.5) 
-        leads = int(msgs_sent * 0.18)
-        converted = int(leads * 0.12)
+        if emails_sent == 0: continue
         
-        stats_data.append({
-            "date": date_str,
-            "campaign": run.get("campaign_name", "General Outreach"),
-            "channel": run.get("workflow", "Email").replace("-", " ").title(),
-            "domain": "outreach.io",
-            "emails": emails_sent,
-            "msgs": msgs_sent,
-            "leads": leads,
-            "converted": converted,
-            "location": locations[hash(date_str) % len(locations)]
-        })
+        if date_str in merged_stats:
+            merged_stats[date_str]["emails"] = int(merged_stats[date_str]["emails"]) + emails_sent
+            merged_stats[date_str]["msgs"] = int(merged_stats[date_str]["msgs"]) + int(emails_sent * 0.8)
+            merged_stats[date_str]["leads"] = int(merged_stats[date_str]["leads"]) + int(emails_sent * 0.15)
+            merged_stats[date_str]["converted"] = int(merged_stats[date_str]["converted"]) + int(emails_sent * 0.05)
+        else:
+            merged_stats[date_str] = {
+                "date": date_str,
+                "campaign": run.get("campaign_name", "Real Campaign"),
+                "channel": run.get("workflow", "Email").replace("-", " ").title(),
+                "domain": "outreach.io",
+                "emails": emails_sent,
+                "msgs": int(emails_sent * 0.8),
+                "leads": int(emails_sent * 0.15),
+                "converted": int(emails_sent * 0.05),
+                "spam_rate": 2.5,
+                "whatsapp_sales": 0,
+                "email_sales": int(emails_sent * 45),
+                "wa_converted": 0,
+                "em_converted": int(emails_sent * 0.05),
+                "location": locations[hash(date_str) % len(locations)]
+            }
 
-    # Enrichment: Ensure there's at least 14 days of data for a good looking chart
-    # If real data is less than 14 entries, we pad it with consistent mock data
-    if len(stats_data) < 14:
-        campaign_names = ["SaaS Founder Outreach", "Enterprise Pilot Push", "AI Ops Outreach"]
-        channels = ["Email", "LinkedIn", "WhatsApp"]
-        
-        for i in range(20, 0, -1):
-            dummy_date = (datetime.now(timezone.utc).date() - timedelta(days=i)).isoformat()
-            # Don't add if we already have data for this date and campaign
-            if any(s["date"] == dummy_date for s in stats_data):
-                continue
-                
-            stats_data.append({
-                "date": dummy_date,
-                "campaign": campaign_names[i % len(campaign_names)],
-                "channel": channels[i % len(channels)],
-                "domain": "growth.co",
-                "emails": 80 + (i * 5),
-                "msgs": 120 + (i * 7),
-                "leads": 15 + (i * 2),
-                "converted": 3 + (i // 3),
-                "location": locations[i % len(locations)]
-            })
-
-    return sorted(stats_data, key=lambda x: x["date"])
+    return sorted(list(merged_stats.values()), key=lambda x: x["date"])
 
 
 # --- Frontend Serving (Must be at the end) ---

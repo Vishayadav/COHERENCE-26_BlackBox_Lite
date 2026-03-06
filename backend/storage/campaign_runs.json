@@ -476,5 +476,50 @@
     ],
     "run_id": 27,
     "created_at": "2026-03-06T22:05:30.740019+00:00"
+  },
+  {
+    "campaign_name": "wd",
+    "emails": [
+      {
+        "lead_id": 1,
+        "name": "Yashvi Parikh",
+        "email": "yashviparikh02@gmail.com",
+        "phone": "+918104644520",
+        "subject": "Quick thought for Yashvi Parikh @ Acme Corp",
+        "body": "Hi Yashvi Parikh,\n\nI was looking into Acme Corp and the great work you're doing in the SaaSm space. I wanted to reach out because we've developed a solution that helps companies like yours achieve Sales Outreach more efficiently.\n\nOur platform WMN21JEB is designed specifically for teams like yours. Would you be open to a brief 10-minute chat next week to see if we can help Acme Corp reach its goals?\n\nBest regards,\n[Alex Corp]"
+      }
+    ],
+    "run_id": 28,
+    "created_at": "2026-03-06T22:39:31.026054+00:00"
+  },
+  {
+    "campaign_name": "wdq",
+    "emails": [
+      {
+        "lead_id": 1,
+        "name": "Yashvi Parikh",
+        "email": "yashviparikh02@gmail.com",
+        "phone": "+918104644520",
+        "subject": "Quick thought for Yashvi Parikh @ Acme Corp",
+        "body": "Hi Yashvi Parikh,\n\nI was looking into Acme Corp and the great work you're doing in the SaaSm space. I wanted to reach out because we've developed a solution that helps companies like yours achieve Sales Outreach more efficiently.\n\nOur platform WMN21JEB is designed specifically for teams like yours. Would you be open to a brief 10-minute chat next week to see if we can help Acme Corp reach its goals?\n\nBest regards,\n[Alex Corp]"
+      }
+    ],
+    "run_id": 29,
+    "created_at": "2026-03-06T22:42:18.363100+00:00"
+  },
+  {
+    "campaign_name": "Unnamed Campaign",
+    "emails": [
+      {
+        "lead_id": 1,
+        "name": "Yashvi Parikh",
+        "email": "yashviparikh02@gmail.com",
+        "phone": "+918104644520",
+        "subject": "Quick thought for Yashvi Parikh @ Acme Corp",
+        "body": "Hi Yashvi Parikh,\n\nI was looking into Acme Corp and the great work you're doing in the SaaSm space. I wanted to reach out because we've developed a solution that helps companies like yours achieve Sales Outreach more efficiently.\n\nOur platform WMN21JEB is designed specifically for teams like yours. Would you be open to a brief 10-minute chat next week to see if we can help Acme Corp reach its goals?\n\nBest regards,\n[Alex Corp]"
+      }
+    ],
+    "run_id": 30,
+    "created_at": "2026-03-06T22:45:54.081157+00:00"
   }
 ]

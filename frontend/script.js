@@ -198,6 +198,8 @@ document.addEventListener("DOMContentLoaded", () => {
       target_geography: selectedGeographies.length ? selectedGeographies.join(", ") : "Global",
       outreach_channel: document.getElementById("outreach_channel").value,
       campaign_goal: document.getElementById("campaign_goal").value,
+      company_logo: document.getElementById("company_logo").value.trim(),
+      brand_color: document.getElementById("brand_color").value,
     };
 
     setLoadingState(true);
@@ -287,6 +289,8 @@ document.addEventListener("DOMContentLoaded", () => {
       if (data.product_description) document.getElementById("product_description").value = data.product_description;
       if (data.target_customer) document.getElementById("target_customer").value = data.target_customer;
       if (data.campaign_goal) document.getElementById("campaign_goal").value = data.campaign_goal;
+      if (data.company_logo) document.getElementById("company_logo").value = data.company_logo;
+      if (data.brand_color) document.getElementById("brand_color").value = data.brand_color;
 
       if (data.target_geography) {
         const geos = data.target_geography.split(",").map((g) => g.trim());

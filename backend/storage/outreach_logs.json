@@ -1,19 +1,10 @@
 [
   {
-    "run_id": 27,
+    "run_id": 30,
     "lead_email": "yashviparikh02@gmail.com",
-    "type": "initial_intro",
-    "subject": "Connecting: Yashvi Parikh",
-    "body": "Hi Yashvi Parikh,\n\nI was looking at your recent work and wanted to connect. Would love to hear about what you're focusing on lately.\n\nBest,",
-    "timestamp": "2026-03-06T22:05:48.989812+00:00"
-  },
-  {
-    "run_id": 27,
-    "lead_email": "yashviparikh02@gmail.com",
-    "type": "ai_reply",
-    "subject": "Re: Connecting: Yashvi Parikh",
-    "body": "Hi Yashvi Parikh,\n\nThanks for getting back to me! I appreciate your message. I'd love to show you how AMKLDEMEW can help with Lead Generation.\n\nWhen would be a good time to catch up briefly?",
-    "incoming_reply": "Sure, what time?\r\n\r\n\r\n\r\n*Yashvi Parikh*\r\n\r\nOn Sat, 7 Mar 2026, 12:07\u202fam , <ravaniviraj@gmail.com> wrote:\r\n\r\n> Hi Yashvi Parikh,\r\n>\r\n> I saw your reply! Thanks for getting back to me.\r\n>\r\n> I'd love to jump on a quick call to discuss the points I mentioned in my\r\n> previous email. Does sometime tomorrow work for you?\r\n>\r\n> Best,",
-    "timestamp": "2026-03-06T22:06:40.310949+00:00"
+    "type": "cold_outreach",
+    "subject": "Quick thought for Yashvi Parikh @ Acme Corp",
+    "body": "Hi Yashvi Parikh,\n\nI was looking into Acme Corp and the great work you're doing in the SaaSm space. I wanted to reach out because we've developed a solution that helps companies like yours achieve Sales Outreach more efficiently.\n\nOur platform WMN21JEB is designed specifically for teams like yours. Would you be open to a brief 10-minute chat next week to see if we can help Acme Corp reach its goals?\n\nBest regards,\n[Alex Corp]",
+    "timestamp": "2026-03-06T22:46:02.800559+00:00"
   }
 ]

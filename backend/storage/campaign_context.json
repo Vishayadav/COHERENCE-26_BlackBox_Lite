@@ -416,5 +416,44 @@
     "campaign_goal": "Lead Generation",
     "created_at": "2026-03-06T22:05:03.226998+00:00",
     "updated_at": "2026-03-06T22:05:03.226998+00:00"
+  },
+  {
+    "industry": "Healthcare",
+    "company_name": "AMKLDEMEW",
+    "product_description": "WMN21JEB",
+    "target_customer": "Enterprises",
+    "target_geography": "North America",
+    "outreach_channel": "Email",
+    "campaign_goal": "Lead Generation",
+    "company_logo": "",
+    "brand_color": "#808dd6",
+    "created_at": "2026-03-06T22:39:03.323602+00:00",
+    "updated_at": "2026-03-06T22:39:03.323602+00:00"
+  },
+  {
+    "industry": "Healthcare",
+    "company_name": "AMKLDEMEW",
+    "product_description": "WMN21JEB",
+    "target_customer": "Enterprises",
+    "target_geography": "North America",
+    "outreach_channel": "Email",
+    "campaign_goal": "Lead Generation",
+    "company_logo": "https://www.freepik.com/free-photos-vectors/free-logo-design",
+    "brand_color": "#a290cb",
+    "created_at": "2026-03-06T22:42:00.217078+00:00",
+    "updated_at": "2026-03-06T22:42:00.217078+00:00"
+  },
+  {
+    "industry": "Healthcare",
+    "company_name": "AMKLDEMEW",
+    "product_description": "WMN21JEB",
+    "target_customer": "Enterprises",
+    "target_geography": "North America",
+    "outreach_channel": "Email",
+    "campaign_goal": "Lead Generation",
+    "company_logo": "https://i.tracxn.com/logo/company/dfbf5f4978221b32c05d6de6a8104e",
+    "brand_color": "#a290cb",
+    "created_at": "2026-03-06T22:45:43.487708+00:00",
+    "updated_at": "2026-03-06T22:45:43.487708+00:00"
   }
 ]

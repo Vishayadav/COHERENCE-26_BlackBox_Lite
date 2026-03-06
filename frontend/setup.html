@@ -233,6 +233,34 @@
                     </div>
                 </div>
 
+                <!-- Section: Branding -->
+                <div class="form-section mb-10">
+                    <div class="flex items-center gap-2 mb-6 border-b border-surface-100 pb-3">
+                        <i data-lucide="palette" class="w-5 h-5 text-black"></i>
+                        <h2 class="text-base font-bold text-black">Branding & Style</h2>
+                    </div>
+
+                    <!-- Company Logo URL -->
+                    <div class="form-group mb-6">
+                        <label for="company_logo" class="form-label block text-sm font-semibold text-black mb-2">
+                            Company Logo URL
+                        </label>
+                        <input type="url" id="company_logo" name="company_logo" class="form-input w-full" placeholder="https://example.com/logo.png">
+                        <p class="text-[10px] text-surface-500 mt-1">Provide a public URL for your logo (transparent PNG/SVG recommended).</p>
+                    </div>
+
+                    <!-- Brand Theme Color -->
+                    <div class="form-group">
+                        <label for="brand_color" class="form-label block text-sm font-semibold text-black mb-2">
+                            Email Background Theme
+                        </label>
+                        <div class="flex items-center gap-3">
+                            <input type="color" id="brand_color" name="brand_color" value="#f4f5fb" class="w-12 h-10 rounded-lg cursor-pointer border-none p-0 overflow-hidden bg-transparent">
+                            <span class="text-sm font-medium text-surface-600">Select a subtle background color for your marketing emails.</span>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Submit -->
                 <div class="flex items-center justify-between pt-6 border-t border-surface-100">
                     <a href="outreach_dashboard.html" class="text-sm font-medium text-surface-500 hover:text-black transition-colors">Cancel</a>
