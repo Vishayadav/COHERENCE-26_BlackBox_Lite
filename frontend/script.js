@@ -19,6 +19,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const geoCheckboxes = document.querySelectorAll(".geo-checkbox");
   const successToast = document.getElementById("success-toast");
   const submitBtn = document.getElementById("submit-btn");
+  const channelChips = document.querySelectorAll(".channel-chip");
+  const outreachChannelInput = document.getElementById("outreach_channel");
 
   if (
     !form ||
@@ -70,6 +72,36 @@ document.addEventListener("DOMContentLoaded", () => {
 
   geoCheckboxes.forEach((checkbox) => {
     checkbox.addEventListener("change", updateSelectedGeographies);
+  });
+
+  // Channel Selection
+  channelChips.forEach(chip => {
+    chip.addEventListener("click", () => {
+      channelChips.forEach(c => {
+        c.classList.remove("selected", "border-black", "ring-1", "ring-black", "bg-brand-50");
+        c.classList.add("border-surface-200", "bg-surface-50");
+        
+        // Fix text colors for non-selected
+        const span = c.querySelector("span:not(.bg-brand-200)");
+        if (span) {
+           span.classList.remove("text-brand-700", "font-semibold");
+           span.classList.add("text-surface-600", "font-medium");
+        }
+      });
+      
+      chip.classList.add("selected", "border-black", "ring-1", "ring-black", "bg-brand-50");
+      chip.classList.remove("border-surface-200", "bg-surface-50");
+      
+      // Fix text colors for selected
+      const span = chip.querySelector("span:not(.bg-brand-200)");
+      if (span) {
+          span.classList.add("text-brand-700", "font-semibold");
+          span.classList.remove("text-surface-600", "font-medium");
+      }
+      
+      const channel = chip.dataset.channel;
+      if (outreachChannelInput) outreachChannelInput.value = channel;
+    });
   });
 
   function updateSelectedGeographies() {
@@ -262,6 +294,11 @@ document.addEventListener("DOMContentLoaded", () => {
           if (geos.includes(cb.value)) cb.checked = true;
         });
         updateSelectedGeographies();
+      }
+
+      if (data.outreach_channel) {
+        const targetChip = Array.from(channelChips).find(c => c.dataset.channel === data.outreach_channel);
+        if (targetChip) targetChip.click();
       }
     } catch (error) {
       console.warn("Could not restore form data:", error);

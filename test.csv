@@ -1,3 +1,2 @@
-name,email,company,industry,location
-Yashvi Parikh,yashviparikh02@gmail.com,Acme Corp,SaaS
-Emily Chen,emily@dataflow.io,DataFlow,AI
+name,company,email,industry,location,phone
+Yashvi Parikh,Acme Corp,yashviparikh02@gmail.com,SaaSm,Mumbai,"+918104644520"

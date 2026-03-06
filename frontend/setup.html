@@ -200,15 +200,15 @@
                             Preferred Outreach Channel
                         </label>
                         <div class="flex flex-wrap items-center gap-3">
-                            <div class="channel-chip selected flex items-center gap-2 px-4 py-2.5 rounded-xl border cursor-default">
+                            <div class="channel-chip selected flex items-center gap-2 px-4 py-2.5 rounded-xl border cursor-pointer transition-all hover:bg-brand-50" data-channel="Email">
                                 <i data-lucide="mail" class="w-4 h-4 text-brand-700"></i>
                                 <span class="text-sm font-semibold text-brand-700">Email</span>
                                 <span class="text-[10px] px-1.5 py-0.5 rounded bg-brand-200 text-brand-700 font-bold uppercase tracking-wide">V1</span>
                             </div>
-                            <div class="channel-chip flex items-center gap-2 px-4 py-2.5 rounded-xl border border-surface-200 bg-surface-50 cursor-not-allowed opacity-60">
-                                <i data-lucide="linkedin" class="w-4 h-4 text-surface-500"></i>
-                                <span class="text-sm font-medium text-surface-600">LinkedIn</span>
-                                <span class="text-[10px] px-1.5 py-0.5 rounded bg-surface-200 text-surface-600 font-bold uppercase tracking-wide">Soon</span>
+                            <div class="channel-chip flex items-center gap-2 px-4 py-2.5 rounded-xl border border-surface-200 bg-surface-50 cursor-pointer transition-all hover:bg-brand-50" data-channel="WhatsApp">
+                                <i data-lucide="message-square" class="w-4 h-4 text-brand-600"></i>
+                                <span class="text-sm font-medium text-surface-600">WhatsApp</span>
+                                <span class="text-[10px] px-1.5 py-0.5 rounded bg-brand-200 text-brand-700 font-bold uppercase tracking-wide">V1</span>
                             </div>
                         </div>
                         <input type="hidden" id="outreach_channel" name="outreach_channel" value="Email">

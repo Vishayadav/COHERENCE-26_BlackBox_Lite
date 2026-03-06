@@ -3,3 +3,5 @@ uvicorn==0.35.0
 python-multipart==0.0.20
 google-auth-oauthlib==1.2.1
 google-api-python-client==2.150.0
+python-dotenv==1.0.1
+twilio==9.4.1

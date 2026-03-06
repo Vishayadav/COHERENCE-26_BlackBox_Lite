@@ -25,6 +25,17 @@ import asyncio
 import smtplib
 import imaplib
 import time
+from twilio.rest import Client
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
+
+# Twilio Configuration
+TWILIO_ACCOUNT_SID = os.getenv("TWILIO_ACCOUNT_SID")
+TWILIO_AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN")
+TWILIO_WHATSAPP_NUMBER = os.getenv("TWILIO_WHATSAPP_NUMBER")
+twilio_client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
 
 app = FastAPI(title="OutreachFlow AI Backend", version="0.1.0")
 
@@ -59,7 +70,7 @@ GENERATED_CSV_DIR.mkdir(parents=True, exist_ok=True)
 # Routes will be defined below. Frontend serving moved to the end of file.
 
 EMAIL_REGEX = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
-REQUIRED_CSV_HEADERS = ["name", "company", "email", "industry", "location"]
+REQUIRED_CSV_HEADERS = ["name", "company", "email", "industry", "location", "phone"]
 
 
 class CampaignContext(BaseModel):
@@ -146,6 +157,7 @@ def _build_lead(base: dict[str, str], lead_id: int, source: str) -> dict:
         "email": base.get("email", "").strip().lower(),
         "industry": base.get("industry", "").strip() or "Unknown",
         "location": base.get("location", "").strip() or "Unknown",
+        "phone": str(base.get("phone", "")).strip(),
         "linkedin": base.get("linkedin", "").strip(),
         "status": "Not Contacted",
         "source": source,
@@ -171,6 +183,7 @@ class FinalizedEmail(BaseModel):
     lead_id: int
     name: str
     email: str
+    phone: str = ""
     subject: str
     body: str
 
@@ -215,6 +228,7 @@ def _generate_from_google_maps(request: LeadGenerationRequest, api_key: str) -> 
                 "email": f"contact@{domain}.com",
                 "industry": industry,
                 "location": place.get("formatted_address", request.location),
+                "phone": place.get("formatted_phone_number", place.get("international_phone_number", "")),
                 "linkedin": "",
             }
         )
@@ -240,6 +254,7 @@ def _generate_mock_leads(request: LeadGenerationRequest) -> list[dict]:
                 "email": f"{first.lower()}@{domain}.com",
                 "industry": industry,
                 "location": request.location,
+                "phone": f"+9181{idx:08d}",
                 "linkedin": "",
             }
         )
@@ -251,7 +266,7 @@ def _write_generated_csv(leads: list[dict]) -> str:
     path = GENERATED_CSV_DIR / filename
     with path.open("w", newline="", encoding="utf-8") as file:
         writer = csv.writer(file)
-        writer.writerow(["Name", "Company", "Email", "Industry", "Location", "LinkedIn"])
+        writer.writerow(["Name", "Company", "Email", "Industry", "Location", "Phone", "LinkedIn"])
         for lead in leads:
             writer.writerow(
                 [
@@ -260,6 +275,7 @@ def _write_generated_csv(leads: list[dict]) -> str:
                     lead.get("email", ""),
                     lead.get("industry", ""),
                     lead.get("location", ""),
+                    lead.get("phone", ""),
                     lead.get("linkedin", ""),
                 ]
             )
@@ -305,6 +321,7 @@ async def upload_leads_csv(file: UploadFile = File(...)) -> dict:
             "email": str(row.get(header_map["email"], "")).strip().lower(),
             "industry": str(row.get(header_map["industry"], "")).strip(),
             "location": str(row.get(header_map["location"], "")).strip(),
+            "phone": str(row.get(header_map["phone"], "")).strip(),
             "linkedin": str(row.get(header_map.get("linkedin", ""), "")).strip(),
         }
         if not any(normalized.values()):
@@ -633,6 +650,30 @@ async def _send_email(config, to, subject, body):
         return await asyncio.to_thread(_send_email_sync, config, to, subject, body)
 
 
+async def _send_whatsapp(to_number, body):
+    """
+    Sends a WhatsApp message via Twilio.
+    to_number should be in format '+918104644520'
+    """
+    try:
+        if not to_number.startswith("whatsapp:"):
+            to_payload = f"whatsapp:{to_number}"
+        else:
+            to_payload = to_number
+            
+        message = await asyncio.to_thread(
+            twilio_client.messages.create,
+            from_=TWILIO_WHATSAPP_NUMBER,
+            body=body,
+            to=to_payload
+        )
+        _log_gmail(f"SUCCESS: WhatsApp sent to {to_number} (SID: {message.sid})")
+        return message.sid
+    except Exception as e:
+        _log_gmail(f"ERROR: WhatsApp send failed to {to_number}: {str(e)}")
+        raise e
+
+
 async def _poll_for_reply(config, target_email, timeout_seconds=180):
     """
     Polls the IMAP inbox for an UNSEEN email from target_email.
@@ -640,6 +681,10 @@ async def _poll_for_reply(config, target_email, timeout_seconds=180):
     """
     _log_gmail(f"STARTING POLL: Waiting for reply from {target_email} (timeout: {timeout_seconds}s)")
     
+    if not config or not config.get("smtp_host"):
+        _log_gmail(f"POLL SKIPPED: No SMTP config provided for mailbox polling.")
+        return None
+        
     # We assume GMail if not specified, or we could derive from host
     host = "imap.gmail.com"
     if "outlook" in config["smtp_host"].lower(): host = "outlook.office365.com"
@@ -756,17 +801,23 @@ async def _generate_ai_chat_response(lead_data, incoming_text, campaign_ctx):
 
 @app.post("/api/campaign/launch/{run_id}")
 async def launch_campaign(run_id: int, workflow: str = "cold-email"):
-    _log_gmail(f"API CALL: /api/campaign/launch/{run_id} | workflow: {workflow}")
-    if not SMTP_CONFIG_FILE.exists():
-        raise HTTPException(status_code=401, detail="SMTP not configured")
+    # Get last campaign context for AI generation
+    contexts = _load_json(CAMPAIGN_DB)
+    campaign_ctx = contexts[-1] if contexts else {}
+    channel = campaign_ctx.get("outreach_channel", "Email")
+
+    if channel != "WhatsApp" and not SMTP_CONFIG_FILE.exists():
+        raise HTTPException(status_code=401, detail="SMTP not configured. Please go to Stage 4 and pair your email.")
     
     runs = _load_json(CAMPAIGN_RUNS_DB)
     run = next((r for r in runs if r["run_id"] == run_id), None)
     if not run:
         raise HTTPException(status_code=404, detail="Campaign run not found")
     
-    with open(SMTP_CONFIG_FILE, "r") as f:
-        config = json.load(f)
+    config = None
+    if SMTP_CONFIG_FILE.exists():
+        with open(SMTP_CONFIG_FILE, "r") as f:
+            config = json.load(f)
         
     total_emails = len(run["emails"])
     if workflow == "nurture":
@@ -774,14 +825,10 @@ async def launch_campaign(run_id: int, workflow: str = "cold-email"):
     
     campaign_progress[run_id] = {"total": total_emails, "sent": 0, "status": "sending"}
     
-    # Get last campaign context for AI generation
-    contexts = _load_json(CAMPAIGN_DB)
-    campaign_ctx = contexts[-1] if contexts else {}
-    
     # Start background task for sending
     asyncio.create_task(_process_bulk_send(run_id, config, run["emails"], workflow, campaign_ctx))
     
-    return {"message": "Launched via SMTP", "run_id": run_id, "workflow": workflow}
+    return {"message": f"Launched via {channel}", "run_id": run_id, "workflow": workflow}
 
 
 async def _process_bulk_send(run_id, config, emails, workflow, campaign_ctx):
@@ -796,20 +843,37 @@ async def _process_bulk_send(run_id, config, emails, workflow, campaign_ctx):
 
 
 async def _process_single_lead(run_id, config, email_data, workflow, campaign_ctx):
+    # Determine channel once
+    channel = campaign_ctx.get("outreach_channel", "Email")
+    
+    async def _universal_send(to_addr, subject, body):
+        if channel == "WhatsApp":
+            # For WhatsApp, we use the phone number if available
+            target = phone_to_use or to_addr
+            return await _send_whatsapp(target, body)
+        else:
+            return await _send_email(config, to_addr, subject, body)
+
     try:
         # Enrich lead data with full metadata if missing
         lead_id = email_data.get("lead_id")
         full_leads = _load_json(LEADS_DB)
         full_lead = next((l for l in full_leads if l.get("lead_id") == lead_id), {})
         
+        # Merge phone from lead DB if missing in email_data
+        phone_to_use = email_data.get("phone") or full_lead.get("phone", "")
         # Merge - priority to full_lead metadata, but keep email_data's specific subject/body
         process_data = {**full_lead, **email_data}
         
         if workflow == "nurture":
             # Step 1: Soft intro
-            intro_subject = f"Connecting: {process_data.get('name', 'there')}"
-            intro_body = f"Hi {process_data.get('name', 'there')},\n\nI was looking at your recent work and wanted to connect. Would love to hear about what you're focusing on lately.\n\nBest,"
-            await _send_email(config, process_data["email"], intro_subject, intro_body)
+            if channel == "WhatsApp":
+                intro_subject = "WhatsApp Message"
+                intro_body = f"Hi {process_data.get('name', 'there')}! I saw your profile and wanted to connect here. Hope you're having a great week!"
+            else:
+                intro_subject = f"Connecting: {process_data.get('name', 'there')}"
+                intro_body = f"Hi {process_data.get('name', 'there')},\n\nI was looking at your recent work and wanted to connect. Would love to hear about what you're focusing on lately.\n\nBest,"
+            await _universal_send(process_data["email"], intro_subject, intro_body)
             
             _log_outreach_json({
                 "run_id": run_id,
@@ -832,7 +896,7 @@ async def _process_single_lead(run_id, config, email_data, workflow, campaign_ct
                 # Step 3a: AI Understands and Responds
                 try:
                     ai_reply_dict = await _generate_ai_chat_response(process_data, reply_text, campaign_ctx)
-                    await _send_email(config, process_data["email"], ai_reply_dict.get("subject", ""), ai_reply_dict.get("body", ""))
+                    await _universal_send(process_data["email"], ai_reply_dict.get("subject", ""), ai_reply_dict.get("body", ""))
                     
                     _log_outreach_json({
                         "run_id": run_id,
@@ -848,10 +912,13 @@ async def _process_single_lead(run_id, config, email_data, workflow, campaign_ct
                 except Exception as ae:
                     _log_gmail(f"AI response task failed for {process_data['email']}: {ae}")
             else:
-                # Step 3b: Fallback Nurture Flow - CLEAN SLATE (No 'Re:' prefix to avoid history)
-                followup_subject = intro_subject.replace("Connecting:", "Quick Follow-up:")
-                followup_body = f"Hi {process_data.get('name', 'there')},\n\nJust floating my previous note to the top of your inbox. Let me know if you'd be open to a quick chat when you have a moment.\n\nThanks,"
-                await _send_email(config, process_data["email"], followup_subject, followup_body)
+                if channel == "WhatsApp":
+                    followup_subject = "WhatsApp Follow-up"
+                    followup_body = f"Hey {process_data.get('name', 'there')}, just checking in case you missed my last message! Would love to chat briefly if you're free later."
+                else:
+                    followup_subject = intro_subject.replace("Connecting:", "Quick Follow-up:")
+                    followup_body = f"Hi {process_data.get('name', 'there')},\n\nJust floating my previous note to the top of your inbox. Let me know if you'd be open to a quick chat when you have a moment.\n\nThanks,"
+                await _universal_send(process_data["email"], followup_subject, followup_body)
                 
                 _log_outreach_json({
                     "run_id": run_id,
@@ -866,7 +933,7 @@ async def _process_single_lead(run_id, config, email_data, workflow, campaign_ct
                 
                 # Final Pitch if still no response
                 await asyncio.sleep(2)
-                await _send_email(config, process_data["email"], process_data["subject"], process_data["body"])
+                await _universal_send(process_data["email"], process_data["subject"], process_data["body"])
                 
                 _log_outreach_json({
                     "run_id": run_id,
@@ -879,7 +946,7 @@ async def _process_single_lead(run_id, config, email_data, workflow, campaign_ct
                 campaign_progress[run_id]["sent"] = int(campaign_progress[run_id]["sent"]) + 1
         else:
             # Default "cold-email" single send - NO DELAY
-            await _send_email(config, process_data["email"], process_data["subject"], process_data["body"])
+            await _universal_send(process_data["email"], process_data["subject"], process_data["body"])
             
             _log_outreach_json({
                 "run_id": run_id,

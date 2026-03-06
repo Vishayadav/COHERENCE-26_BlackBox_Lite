@@ -37,6 +37,16 @@ async function init() {
         document.getElementById("target_audience").value = savedContext.target_customer || "";
         document.getElementById("product_description").value = savedContext.product_description || "";
         document.getElementById("campaign_goal").value = savedContext.campaign_goal || "Book a Demo";
+        
+        if (savedContext.outreach_channel === "WhatsApp") {
+            document.getElementById("ai_prompt").value = "Generate 3 personalized WhatsApp message variants. Keep them concise (under 300 chars), professional yet conversational. NO placeholders like [Name].";
+            document.querySelectorAll('h1').forEach(h1 => {
+                if (h1.textContent.includes("Email")) h1.textContent = h1.textContent.replace("Email", "WhatsApp");
+            });
+            // Update Continue Button text
+            const btn = document.getElementById("continue-workflow-btn");
+            if (btn) btn.innerHTML = `<i data-lucide="zap" class="w-4 h-4 mr-2"></i> Continue to WhatsApp Engine`;
+        }
     }
 }
 
@@ -135,6 +145,7 @@ function renderLeadCards() {
                 
                 <div class="space-y-2">
                     <p class="text-xs text-surface-600"><i data-lucide="mail" class="w-3.5 h-3.5 inline mr-1"></i> ${lead.email}</p>
+                    ${lead.phone ? `<p class="text-xs text-surface-600"><i data-lucide="phone" class="w-3.5 h-3.5 inline mr-1"></i> ${lead.phone}</p>` : ''}
                     <p class="text-xs text-surface-600"><i data-lucide="briefcase" class="w-3.5 h-3.5 inline mr-1"></i> ${lead.industry}</p>
                 </div>
 
@@ -260,6 +271,7 @@ continueBtn.addEventListener("click", async () => {
                 lead_id: lead.lead_id,
                 name: lead.name,
                 email: lead.email,
+                phone: lead.phone || "",
                 subject: v.subject,
                 body: v.body
             });
@@ -322,6 +334,7 @@ downloadBtn.addEventListener("click", () => {
                 lead_id: lead.lead_id,
                 name: lead.name,
                 email: lead.email,
+                phone: lead.phone || "",
                 subject: v.subject,
                 body: v.body
             });
@@ -330,12 +343,13 @@ downloadBtn.addEventListener("click", () => {
 
     if (!selectedData.length) return;
 
-    let csvContent = "data:text/csv;charset=utf-8,LeadID,Name,Email,Subject,Body\n";
+    let csvContent = "data:text/csv;charset=utf-8,LeadID,Name,Email,Phone,Subject,Body\n";
     selectedData.forEach(row => {
         const line = [
             row.lead_id,
             `"${row.name.replace(/"/g, '""')}"`,
             row.email,
+            `"${row.phone}"`,
             `"${row.subject.replace(/"/g, '""')}"`,
             `"${row.body.replace(/"/g, '""')}"`
         ].join(",");

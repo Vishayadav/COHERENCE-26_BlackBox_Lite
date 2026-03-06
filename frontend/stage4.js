@@ -1,4 +1,5 @@
 const API_BASE = ""; // Use relative paths
+const CONTEXT_KEY = "campaign_context";
 
 const workflowCards = document.querySelectorAll(".workflow-card");
 const executionSection = document.getElementById("execution-section");
@@ -20,7 +21,74 @@ async function init() {
     if (window.location.hostname === "127.0.0.1") {
         console.warn("Please use http://localhost:8000 for consistency.");
     }
-    await checkConnection();
+    
+    const savedContext = JSON.parse(localStorage.getItem(CONTEXT_KEY) || "{}");
+    console.log("Current Stage 4 Context:", savedContext);
+    
+    if (savedContext.outreach_channel === "WhatsApp") {
+        console.log("Activating WhatsApp UI Mode...");
+        setupWhatsAppUI();
+    } else {
+        console.log("Activating Email UI Mode (Checking SMTP)...");
+        await checkConnection();
+    }
+}
+
+function setupWhatsAppUI() {
+    // Hide email-specific auth
+    authContainer.classList.add("hidden");
+    launchContainer.classList.remove("hidden");
+    
+    // Update headers
+    const mainTitle = document.querySelector("h1");
+    if (mainTitle) mainTitle.textContent = "Choose Your WhatsApp Workflow";
+    
+    // Update launch text
+    launchNowBtn.innerHTML = `<i data-lucide="zap" class="w-4 h-4 mr-2"></i> Launch WhatsApp Campaign`;
+    if (typeof lucide !== "undefined") lucide.createIcons();
+
+    // Replace workflow cards with WhatsApp templates
+    const grid = document.querySelector("main .grid");
+    if (grid) {
+        grid.innerHTML = `
+            <div class="workflow-card bg-white p-8 rounded-3xl border border-surface-200 shadow-sm hover:shadow-xl transition-all flex flex-col group cursor-pointer" data-workflow="whatsapp-direct">
+                <div class="w-16 h-16 rounded-2xl bg-brand-100 flex items-center justify-center text-brand-600 mb-6 group-hover:bg-brand-500 group-hover:text-black transition-colors">
+                    <i data-lucide="message-square" class="w-8 h-8"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-black mb-3">Direct Message</h3>
+                <p class="text-surface-600 text-sm mb-6 flex-1">Send a hyper-personalized WhatsApp message directly to your leads' phones. High response rates guaranteed.</p>
+                <button class="w-full py-3 rounded-xl bg-black text-white font-bold text-sm group-hover:bg-brand-500 group-hover:text-black transition-colors">Select Template</button>
+            </div>
+            <div class="workflow-card bg-white p-8 rounded-3xl border border-surface-200 shadow-sm hover:shadow-xl transition-all flex flex-col group cursor-pointer" data-workflow="nurture">
+                <div class="w-16 h-16 rounded-2xl bg-blue-100 flex items-center justify-center text-blue-600 mb-6 group-hover:bg-blue-500 group-hover:text-white transition-colors">
+                    <i data-lucide="refresh-cw" class="w-8 h-8"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-black mb-3">WhatsApp Sequence</h3>
+                <p class="text-surface-600 text-sm mb-6 flex-1">Strategic follow-ups on WhatsApp if they don't respond. Maintains a professional human touch in chats.</p>
+                <button class="w-full py-3 rounded-xl bg-black text-white font-bold text-sm group-hover:bg-blue-500 group-hover:text-white transition-colors">Select Template</button>
+            </div>
+            <div class="workflow-card bg-white p-8 rounded-3xl border border-surface-200 shadow-sm hover:shadow-xl transition-all flex flex-col group cursor-pointer" data-workflow="whatsapp-broadcast">
+                <div class="w-16 h-16 rounded-2xl bg-purple-100 flex items-center justify-center text-purple-600 mb-6 group-hover:bg-purple-500 group-hover:text-white transition-colors">
+                    <i data-lucide="users" class="w-8 h-8"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-black mb-3">Bulk Broadcast</h3>
+                <p class="text-surface-600 text-sm mb-6 flex-1">Rapid notification system across all selected leads. Perfect for announcements or limited-time events.</p>
+                <button class="w-full py-3 rounded-xl bg-black text-white font-bold text-sm group-hover:bg-purple-500 group-hover:text-white transition-colors">Select Template</button>
+            </div>
+        `;
+        
+        // Re-attach listeners for new cards
+        document.querySelectorAll(".workflow-card").forEach(card => {
+            card.addEventListener("click", () => {
+                document.querySelectorAll(".workflow-card").forEach(c => c.classList.remove("border-black", "ring-2", "ring-black"));
+                card.classList.add("border-black", "ring-2", "ring-black");
+                selectedWorkflow = card.dataset.workflow;
+                executionSection.classList.remove("hidden");
+                executionSection.scrollIntoView({ behavior: 'smooth' });
+            });
+        });
+        if (typeof lucide !== "undefined") lucide.createIcons();
+    }
 }
 
 async function checkConnection() {

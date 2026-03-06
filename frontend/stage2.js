@@ -76,7 +76,7 @@ function renderLeads(items) {
   if (!items || !items.length) {
     leadTableBody.innerHTML = `
       <tr>
-        <td class="px-3 py-3 text-surface-500" colspan="6">No leads yet.</td>
+        <td class="px-3 py-3 text-surface-500" colspan="7">No leads yet.</td>
       </tr>
     `;
     return;
@@ -87,12 +87,13 @@ function renderLeads(items) {
     .map(
       (lead) => `
       <tr class="border-t border-surface-800/70">
-        <td class="px-3 py-2">${lead.name || "-"}</td>
-        <td class="px-3 py-2">${lead.company || "-"}</td>
-        <td class="px-3 py-2">${lead.email || "-"}</td>
-        <td class="px-3 py-2">${lead.industry || "-"}</td>
-        <td class="px-3 py-2">${lead.location || "-"}</td>
-        <td class="px-3 py-2">${lead.source || "-"}</td>
+        <td class="px-3 py-2 text-black">${lead.name || "-"}</td>
+        <td class="px-3 py-2 text-black">${lead.company || "-"}</td>
+        <td class="px-3 py-2 text-black">${lead.email || "-"}</td>
+        <td class="px-3 py-2 text-black">${lead.industry || "-"}</td>
+        <td class="px-3 py-2 text-black">${lead.location || "-"}</td>
+        <td class="px-3 py-2 text-black">${lead.phone || "-"}</td>
+        <td class="px-3 py-2 text-black">${lead.source || "-"}</td>
       </tr>
     `
     )
