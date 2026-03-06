@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Custom Workflow Builder - OutreachFlow AI</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="font-inter bg-surface-50 text-surface-900 antialiased">
+  <nav class="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md border-b border-surface-100">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-6">
+        <a href="index.html" class="flex items-center gap-2">
+          <i data-lucide="zap" class="w-6 h-6 text-black fill-black"></i>
+          <span class="text-xl font-bold text-black">OutreachFlow</span>
+        </a>
+        <div class="h-6 w-px bg-surface-200"></div>
+        <span class="text-sm font-semibold text-surface-600">Custom Workflow Builder</span>
+      </div>
+      <a href="stage4.html" class="text-sm font-bold text-black hover:text-brand-600 flex items-center gap-2">
+        <i data-lucide="arrow-left" class="w-4 h-4"></i>
+        Wait, go back to Campaign
+      </a>
+    </div>
+  </nav>
+
+  <main class="pt-24 pb-10 min-h-screen">
+    <div class="max-w-7xl mx-auto px-6">
+      <div class="mb-6">
+        <h1 class="text-3xl font-extrabold text-black mb-2">Template 3 - Custom Workflow Builder</h1>
+        <p class="text-surface-600">Drag nodes into the canvas and build a mixed-channel outreach flow.</p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <section class="lg:col-span-3 p-5 rounded-2xl bg-white border border-surface-200 shadow-sm">
+          <h2 class="text-base font-bold text-black mb-3">Node Palette</h2>
+          <div class="space-y-3" id="palette">
+            <div class="palette-node rounded-xl border border-surface-200 p-3 bg-surface-50 cursor-grab" draggable="true" data-type="send_email">
+              <p class="text-sm font-semibold">Send Message</p>
+              <p class="text-xs text-surface-500 mt-1">Initial outreach or main message step.</p>
+            </div>
+            <div class="palette-node rounded-xl border border-surface-200 p-3 bg-surface-50 cursor-grab" draggable="true" data-type="wait">
+              <p class="text-sm font-semibold">Wait / Delay</p>
+              <p class="text-xs text-surface-500 mt-1">Pause sequence for N days.</p>
+            </div>
+            <div class="palette-node rounded-xl border border-surface-200 p-3 bg-surface-50 cursor-grab" draggable="true" data-type="condition">
+              <p class="text-sm font-semibold">Conditional Branch</p>
+              <p class="text-xs text-surface-500 mt-1">Check response/open condition.</p>
+            </div>
+            <div class="palette-node rounded-xl border border-surface-200 p-3 bg-surface-50 cursor-grab" draggable="true" data-type="follow_up">
+              <p class="text-sm font-semibold">Follow-Up Message</p>
+              <p class="text-xs text-surface-500 mt-1">Follow-up email content.</p>
+            </div>
+            <div class="palette-node rounded-xl border border-surface-200 p-3 bg-surface-50 cursor-grab" draggable="true" data-type="end">
+              <p class="text-sm font-semibold">End Workflow</p>
+              <p class="text-xs text-surface-500 mt-1">Marks completion point.</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="lg:col-span-6 p-5 rounded-2xl bg-white border border-surface-200 shadow-sm">
+          <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+            <h2 class="text-base font-bold text-black">Workflow Canvas</h2>
+            <div class="flex items-center gap-2">
+              <select id="channel-select" class="form-input h-10 min-w-[190px]">
+                <option value="email" selected>Default: Email</option>
+                <option value="whatsapp">Default: WhatsApp</option>
+              </select>
+              <input id="workflow-name" class="form-input max-w-xs" type="text" placeholder="My Sales Workflow" value="My Sales Workflow">
+            </div>
+          </div>
+
+          <div id="canvas" class="min-h-[420px] rounded-xl border-2 border-dashed border-surface-300 bg-surface-50 p-4">
+            <p id="canvas-empty" class="text-sm text-surface-500">Drag nodes here to build workflow.</p>
+            <ul id="canvas-list" class="space-y-3"></ul>
+          </div>
+
+          <div class="mt-4 flex flex-wrap items-center gap-3">
+            <button id="validate-btn" class="px-5 py-2.5 rounded-xl border border-surface-300 text-sm font-semibold">Validate</button>
+            <button id="save-btn" class="px-5 py-2.5 rounded-xl bg-black text-white text-sm font-semibold">Save Workflow</button>
+            <button id="simulate-btn" class="px-5 py-2.5 rounded-xl bg-brand-500 text-black text-sm font-bold">Simulate</button>
+            <button id="clear-btn" class="px-5 py-2.5 rounded-xl border border-red-200 text-red-700 text-sm font-semibold">Clear</button>
+          </div>
+        </section>
+
+        <section class="lg:col-span-3 p-5 rounded-2xl bg-white border border-surface-200 shadow-sm">
+          <h2 class="text-base font-bold text-black mb-3">Node Config</h2>
+          <div id="config-panel" class="text-sm text-surface-600">
+            Select a node to configure.
+          </div>
+        </section>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+        <section class="p-5 rounded-2xl bg-white border border-surface-200 shadow-sm">
+          <h3 class="text-sm font-bold text-black mb-2">Workflow JSON Preview</h3>
+          <pre id="json-preview" class="text-xs bg-surface-50 border border-surface-200 rounded-xl p-3 overflow-auto max-h-72"></pre>
+        </section>
+        <section class="p-5 rounded-2xl bg-white border border-surface-200 shadow-sm">
+          <h3 class="text-sm font-bold text-black mb-2">Backend Response</h3>
+          <pre id="api-output" class="text-xs bg-surface-50 border border-surface-200 rounded-xl p-3 overflow-auto max-h-72">No action yet.</pre>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const API_BASE = "";
+    const palette = document.getElementById("palette");
+    const canvas = document.getElementById("canvas");
+    const canvasList = document.getElementById("canvas-list");
+    const canvasEmpty = document.getElementById("canvas-empty");
+    const configPanel = document.getElementById("config-panel");
+    const jsonPreview = document.getElementById("json-preview");
+    const apiOutput = document.getElementById("api-output");
+    const workflowNameInput = document.getElementById("workflow-name");
+    const channelSelect = document.getElementById("channel-select");
+
+    const validateBtn = document.getElementById("validate-btn");
+    const saveBtn = document.getElementById("save-btn");
+    const simulateBtn = document.getElementById("simulate-btn");
+    const clearBtn = document.getElementById("clear-btn");
+
+    const NODE_LABEL = {
+      send_email: "Send Email",
+      wait: "Wait / Delay",
+      condition: "Conditional Branch",
+      follow_up: "Follow-Up Message",
+      end: "End Workflow"
+    };
+
+    let nodes = [];
+    let selectedNodeId = null;
+    let draggedCanvasNodeId = null;
+
+    if (typeof lucide !== "undefined") {
+      lucide.createIcons();
+    }
+
+    function newNode(type) {
+      const id = `node_${Date.now()}_${Math.floor(Math.random() * 10000)}`;
+      const defaultChannel = channelSelect ? channelSelect.value : "email";
+      const baseConfig = {
+        send_email: { channel: defaultChannel, subject: "Quick idea for {{company}}", body: "Hi {{first_name}}, I wanted to reach out regarding..." },
+        wait: { days: 2 },
+        condition: { condition: "email_opened" },
+        follow_up: { channel: defaultChannel, subject: "Following up on my previous note", body: "Hi {{first_name}}, just checking if you had a chance..." },
+        end: {}
+      };
+      return { id, type, label: NODE_LABEL[type], config: baseConfig[type] || {} };
+    }
+
+    function workflowPayload() {
+      return {
+        workflow_name: workflowNameInput.value.trim() || "My Sales Workflow",
+        channel: "mixed",
+        mode: "sales_outreach",
+        nodes: nodes
+      };
+    }
+
+    function renderCanvas() {
+      canvasList.innerHTML = "";
+      canvasEmpty.classList.toggle("hidden", nodes.length > 0);
+
+      nodes.forEach((node, index) => {
+        const li = document.createElement("li");
+        li.className = `rounded-xl border p-3 bg-white cursor-pointer ${selectedNodeId === node.id ? "border-brand-500 ring-2 ring-brand-200" : "border-surface-200"}`;
+        li.setAttribute("data-id", node.id);
+        li.setAttribute("draggable", "true");
+        li.innerHTML = `
+          <div class="flex items-center justify-between gap-2">
+            <div>
+              <p class="text-sm font-semibold text-black">${index + 1}. ${node.label}</p>
+              <p class="text-xs text-surface-500 mt-1">${node.type}${node.config && node.config.channel ? ` | ${node.config.channel}` : ""}</p>
+            </div>
+            <button class="remove-node text-xs px-2 py-1 rounded-lg border border-red-200 text-red-700" data-id="${node.id}">Remove</button>
+          </div>
+        `;
+
+        li.addEventListener("click", (event) => {
+          if (event.target.classList.contains("remove-node")) return;
+          selectedNodeId = node.id;
+          renderCanvas();
+          renderConfigPanel();
+          renderJsonPreview();
+        });
+
+        li.addEventListener("dragstart", () => {
+          draggedCanvasNodeId = node.id;
+        });
+
+        li.addEventListener("dragover", (event) => {
+          event.preventDefault();
+        });
+
+        li.addEventListener("drop", (event) => {
+          event.preventDefault();
+          if (!draggedCanvasNodeId || draggedCanvasNodeId === node.id) return;
+          const fromIdx = nodes.findIndex((n) => n.id === draggedCanvasNodeId);
+          const toIdx = nodes.findIndex((n) => n.id === node.id);
+          if (fromIdx === -1 || toIdx === -1) return;
+          const [moved] = nodes.splice(fromIdx, 1);
+          nodes.splice(toIdx, 0, moved);
+          renderCanvas();
+          renderJsonPreview();
+        });
+
+        canvasList.appendChild(li);
+      });
+
+      canvasList.querySelectorAll(".remove-node").forEach((btn) => {
+        btn.addEventListener("click", (event) => {
+          event.stopPropagation();
+          const id = btn.getAttribute("data-id");
+          nodes = nodes.filter((n) => n.id !== id);
+          if (selectedNodeId === id) selectedNodeId = null;
+          renderCanvas();
+          renderConfigPanel();
+          renderJsonPreview();
+        });
+      });
+    }
+
+    function renderConfigPanel() {
+      const node = nodes.find((n) => n.id === selectedNodeId);
+      if (!node) {
+        configPanel.innerHTML = "Select a node to configure.";
+        return;
+      }
+
+      if (node.type === "wait") {
+        configPanel.innerHTML = `
+          <label class="block">
+            <span class="text-xs font-semibold text-surface-600">Delay (days)</span>
+            <input id="cfg-days" class="form-input w-full mt-1" type="number" min="1" max="30" value="${node.config.days || 2}">
+          </label>
+        `;
+        document.getElementById("cfg-days").addEventListener("input", (e) => {
+          node.config.days = Number(e.target.value);
+          renderJsonPreview();
+        });
+        return;
+      }
+
+      if (node.type === "condition") {
+        configPanel.innerHTML = `
+          <label class="block">
+            <span class="text-xs font-semibold text-surface-600">Condition</span>
+            <select id="cfg-condition" class="form-input w-full mt-1">
+              <option value="email_opened" ${node.config.condition === "email_opened" ? "selected" : ""}>Email Opened?</option>
+              <option value="email_replied" ${node.config.condition === "email_replied" ? "selected" : ""}>Email Replied?</option>
+              <option value="link_clicked" ${node.config.condition === "link_clicked" ? "selected" : ""}>Link Clicked?</option>
+            </select>
+          </label>
+        `;
+        document.getElementById("cfg-condition").addEventListener("change", (e) => {
+          node.config.condition = e.target.value;
+          renderJsonPreview();
+        });
+        return;
+      }
+
+      if (node.type === "send_email" || node.type === "follow_up") {
+        const currentChannel = node.config.channel || "email";
+        const showSubject = currentChannel === "email";
+        configPanel.innerHTML = `
+          <label class="block mb-3">
+            <span class="text-xs font-semibold text-surface-600">Channel</span>
+            <select id="cfg-msg-channel" class="form-input w-full mt-1">
+              <option value="email" ${currentChannel === "email" ? "selected" : ""}>Email</option>
+              <option value="whatsapp" ${currentChannel === "whatsapp" ? "selected" : ""}>WhatsApp</option>
+            </select>
+          </label>
+          <label class="block mb-3 ${showSubject ? "" : "hidden"}" id="cfg-subject-wrap">
+            <span class="text-xs font-semibold text-surface-600">Subject</span>
+            <input id="cfg-subject" class="form-input w-full mt-1" type="text" value="${(node.config.subject || "").replace(/"/g, "&quot;")}">
+          </label>
+          <label class="block mb-3">
+            <span class="text-xs font-semibold text-surface-600">Body ${currentChannel === "whatsapp" ? "(Required for WhatsApp)" : ""}</span>
+            <textarea id="cfg-body" class="form-input w-full mt-1 resize-none" rows="6">${node.config.body || ""}</textarea>
+          </label>
+        `;
+        const channelInput = document.getElementById("cfg-msg-channel");
+        const subjectWrap = document.getElementById("cfg-subject-wrap");
+        const subjectInput = document.getElementById("cfg-subject");
+        const bodyInput = document.getElementById("cfg-body");
+
+        channelInput.addEventListener("change", (e) => {
+          node.config.channel = e.target.value;
+          if (node.config.channel === "whatsapp") {
+            subjectWrap.classList.add("hidden");
+          } else {
+            subjectWrap.classList.remove("hidden");
+          }
+          renderCanvas();
+          renderJsonPreview();
+        });
+
+        if (subjectInput) {
+          subjectInput.addEventListener("input", (e) => {
+            node.config.subject = e.target.value;
+            renderJsonPreview();
+          });
+        }
+
+        bodyInput.addEventListener("input", (e) => {
+          node.config.body = e.target.value;
+          renderJsonPreview();
+        });
+        return;
+      }
+
+      configPanel.innerHTML = "No configuration required for this node.";
+    }
+
+    function renderJsonPreview() {
+      jsonPreview.textContent = JSON.stringify(workflowPayload(), null, 2);
+    }
+
+    palette.querySelectorAll(".palette-node").forEach((item) => {
+      item.addEventListener("dragstart", (event) => {
+        event.dataTransfer.setData("nodeType", item.getAttribute("data-type"));
+      });
+    });
+
+    canvas.addEventListener("dragover", (event) => {
+      event.preventDefault();
+    });
+
+    canvas.addEventListener("drop", (event) => {
+      event.preventDefault();
+      const nodeType = event.dataTransfer.getData("nodeType");
+      if (!nodeType) return;
+      const node = newNode(nodeType);
+      nodes.push(node);
+      selectedNodeId = node.id;
+      renderCanvas();
+      renderConfigPanel();
+      renderJsonPreview();
+    });
+
+    async function callApi(path, payload) {
+      const res = await fetch(`${API_BASE}${path}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(JSON.stringify(data));
+      return data;
+    }
+
+    validateBtn.addEventListener("click", async () => {
+      try {
+        const data = await callApi("/api/workflow/validate", workflowPayload());
+        apiOutput.textContent = JSON.stringify(data, null, 2);
+      } catch (err) {
+        apiOutput.textContent = `Validate failed: ${err.message}`;
+      }
+    });
+
+    saveBtn.addEventListener("click", async () => {
+      try {
+        const payload = workflowPayload();
+        const data = await callApi("/api/workflow/save", payload);
+        apiOutput.textContent = JSON.stringify(data, null, 2);
+        
+        // Save name for Stage 4 UI update
+        localStorage.setItem("last_custom_workflow_name", payload.workflow_name);
+        
+        // Redirect to stage 4
+        const urlParams = new URLSearchParams(window.location.search);
+        const runId = urlParams.get("run_id");
+        alert("Workflow Saved Successfully! Redirecting to Launch page...");
+        window.location.href = runId ? `stage4.html?run_id=${runId}` : "stage4.html";
+      } catch (err) {
+        apiOutput.textContent = `Save failed: ${err.message}`;
+        alert("Validation Error: Please ensure your workflow starts with a message and ends with an 'End' node.");
+      }
+    });
+
+    simulateBtn.addEventListener("click", async () => {
+      try {
+        const data = await callApi("/api/workflow/simulate", workflowPayload());
+        apiOutput.textContent = JSON.stringify(data, null, 2);
+      } catch (err) {
+        apiOutput.textContent = `Simulate failed: ${err.message}`;
+      }
+    });
+
+    clearBtn.addEventListener("click", () => {
+      nodes = [];
+      selectedNodeId = null;
+      renderCanvas();
+      renderConfigPanel();
+      renderJsonPreview();
+      apiOutput.textContent = "Canvas cleared.";
+    });
+
+    // On load: check for existing saved name
+    const lastSavedName = localStorage.getItem("last_custom_workflow_name");
+    if (lastSavedName) {
+        const mainHeading = document.querySelector("h1");
+        if (mainHeading) mainHeading.textContent = `Editor: ${lastSavedName}`;
+        if (workflowNameInput) workflowNameInput.value = lastSavedName;
+    }
+
+    renderCanvas();
+    renderConfigPanel();
+    renderJsonPreview();
+  </script>
+</body>
+</html>

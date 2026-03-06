@@ -25,6 +25,20 @@ async function init() {
     const savedContext = JSON.parse(localStorage.getItem(CONTEXT_KEY) || "{}");
     console.log("Current Stage 4 Context:", savedContext);
     
+    // Update Custom Workflow Heading if one exists
+    const lastCustomName = localStorage.getItem("last_custom_workflow_name");
+    if (lastCustomName) {
+        const customCardTitle = document.querySelector('[data-workflow="custom"] h3');
+        if (customCardTitle) {
+            customCardTitle.textContent = lastCustomName;
+            // Also update the description to be more specific
+            const customCardDesc = document.querySelector('[data-workflow="custom"] p');
+            if (customCardDesc) {
+                customCardDesc.textContent = `Your custom sequence is ready to launch. Using: ${lastCustomName}`;
+            }
+        }
+    }
+
     if (savedContext.outreach_channel === "WhatsApp") {
         console.log("Activating WhatsApp UI Mode...");
         setupWhatsAppUI();
@@ -125,6 +139,13 @@ workflowCards.forEach(card => {
         card.classList.add("border-black", "ring-2", "ring-black");
         
         selectedWorkflow = card.dataset.workflow;
+        
+        if (selectedWorkflow === "custom") {
+            // Redirect to workflow builder
+            window.location.href = `workflow_builder.html?run_id=${currentRunId}`;
+            return;
+        }
+
         executionSection.classList.remove("hidden");
         executionSection.scrollIntoView({ behavior: 'smooth' });
     });

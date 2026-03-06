@@ -1,0 +1,56 @@
+[
+  {
+    "run_id": 1,
+    "workflow_name": "My Sales Workflow",
+    "channel": "mixed",
+    "mode": "sales_outreach",
+    "created_at": "2026-03-06T21:06:23.209437+00:00",
+    "events": [
+      {
+        "order": 1,
+        "node_id": "node_1772831157856_497",
+        "node_type": "send_email",
+        "label": "Send Email",
+        "timestamp": "2026-03-06T21:06:23.209437+00:00",
+        "status": "executed",
+        "details": {}
+      },
+      {
+        "order": 2,
+        "node_id": "node_1772831167181_3713",
+        "node_type": "wait",
+        "label": "Wait / Delay",
+        "timestamp": "2026-03-06T21:06:23.209437+00:00",
+        "status": "executed",
+        "details": {}
+      },
+      {
+        "order": 3,
+        "node_id": "node_1772831170611_3895",
+        "node_type": "condition",
+        "label": "Conditional Branch",
+        "timestamp": "2026-03-06T21:06:23.209437+00:00",
+        "status": "executed",
+        "details": {}
+      },
+      {
+        "order": 4,
+        "node_id": "node_1772831172686_4915",
+        "node_type": "follow_up",
+        "label": "Follow-Up Message",
+        "timestamp": "2026-03-06T21:06:23.209437+00:00",
+        "status": "executed",
+        "details": {}
+      },
+      {
+        "order": 5,
+        "node_id": "node_1772831175904_3593",
+        "node_type": "end",
+        "label": "End Workflow",
+        "timestamp": "2026-03-06T21:06:23.209437+00:00",
+        "status": "executed",
+        "details": {}
+      }
+    ]
+  }
+]

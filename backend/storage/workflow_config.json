@@ -1,0 +1,152 @@
+[
+  {
+    "workflow_name": "My Sales Workflow",
+    "channel": "mixed",
+    "mode": "sales_outreach",
+    "nodes": [
+      {
+        "id": "node_1772831157856_497",
+        "type": "send_email",
+        "label": "Send Email",
+        "config": {
+          "channel": "email",
+          "subject": "Quick idea for {{company}}",
+          "body": "Hi {{first_name}}, I wanted to reach out regarding..."
+        }
+      },
+      {
+        "id": "node_1772831167181_3713",
+        "type": "wait",
+        "label": "Wait / Delay",
+        "config": {
+          "days": 2
+        }
+      },
+      {
+        "id": "node_1772831170611_3895",
+        "type": "condition",
+        "label": "Conditional Branch",
+        "config": {
+          "condition": "email_opened"
+        }
+      },
+      {
+        "id": "node_1772831172686_4915",
+        "type": "follow_up",
+        "label": "Follow-Up Message",
+        "config": {
+          "channel": "email",
+          "subject": "Following up on my previous note",
+          "body": "Hi {{first_name}}, just checking if you had a chance..."
+        }
+      },
+      {
+        "id": "node_1772831175904_3593",
+        "type": "end",
+        "label": "End Workflow",
+        "config": {}
+      }
+    ],
+    "workflow_id": 1,
+    "created_at": "2026-03-06T21:06:27.947793+00:00"
+  },
+  {
+    "workflow_name": "My Sales Workflow",
+    "channel": "mixed",
+    "mode": "sales_outreach",
+    "nodes": [
+      {
+        "id": "node_1772833279106_1544",
+        "type": "send_email",
+        "label": "Send Email",
+        "config": {
+          "channel": "email",
+          "subject": "Quick idea for {{company}}",
+          "body": "Hi {{first_name}}, I wanted to reach out regarding..."
+        }
+      },
+      {
+        "id": "node_1772833280975_9841",
+        "type": "wait",
+        "label": "Wait / Delay",
+        "config": {
+          "days": 2
+        }
+      },
+      {
+        "id": "node_1772833283616_2996",
+        "type": "end",
+        "label": "End Workflow",
+        "config": {}
+      }
+    ],
+    "workflow_id": 2,
+    "created_at": "2026-03-06T21:41:27.624463+00:00"
+  },
+  {
+    "workflow_name": "My Sales Workflowkhusfkshgfdkjsf",
+    "channel": "mixed",
+    "mode": "sales_outreach",
+    "nodes": [
+      {
+        "id": "node_1772833403620_5607",
+        "type": "send_email",
+        "label": "Send Email",
+        "config": {
+          "channel": "email",
+          "subject": "Quick idea for {{company}}",
+          "body": "Hi {{first_name}}, I wanted to reach out regarding..."
+        }
+      },
+      {
+        "id": "node_1772833406066_3169",
+        "type": "wait",
+        "label": "Wait / Delay",
+        "config": {
+          "days": 2
+        }
+      },
+      {
+        "id": "node_1772833407734_2408",
+        "type": "end",
+        "label": "End Workflow",
+        "config": {}
+      }
+    ],
+    "workflow_id": 3,
+    "created_at": "2026-03-06T21:43:30.119627+00:00"
+  },
+  {
+    "workflow_name": "Customized Workflow",
+    "channel": "mixed",
+    "mode": "sales_outreach",
+    "nodes": [
+      {
+        "id": "node_1772833403620_5607",
+        "type": "send_email",
+        "label": "Send Email",
+        "config": {
+          "channel": "email",
+          "subject": "Quick idea for {{company}}",
+          "body": "Hi {{first_name}}, I wanted to reach out regarding..."
+        }
+      },
+      {
+        "id": "node_1772833406066_3169",
+        "type": "wait",
+        "label": "Wait / Delay",
+        "config": {
+          "days": 2
+        }
+      },
+      {
+        "id": "node_1772833407734_2408",
+        "type": "end",
+        "label": "End Workflow",
+        "config": {}
+      }
+    ],
+    "workflow_id": 4,
+    "created_at": "2026-03-06T21:43:56.313843+00:00"
+  }
+]

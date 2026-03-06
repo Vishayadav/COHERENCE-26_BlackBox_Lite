@@ -179,19 +179,21 @@
   </div>
 
   <script>
-    const data = [
-      { date: "2026-02-07", campaign: "SaaS Founder Outreach", channel: "Email", domain: "saas.io", emails: 120, msgs: 148, leads: 26, converted: 6, location: "USA" },
-      { date: "2026-02-09", campaign: "SaaS Founder Outreach", channel: "LinkedIn", domain: "startuphub.com", emails: 70, msgs: 132, leads: 22, converted: 5, location: "UK" },
-      { date: "2026-02-12", campaign: "Enterprise Pilot Push", channel: "Email", domain: "enterpriseworks.com", emails: 140, msgs: 172, leads: 24, converted: 4, location: "USA" },
-      { date: "2026-02-15", campaign: "AI Ops Outreach", channel: "Email", domain: "cloudscale.ai", emails: 160, msgs: 201, leads: 31, converted: 8, location: "India" },
-      { date: "2026-02-19", campaign: "AI Ops Outreach", channel: "WhatsApp", domain: "devopsdaily.io", emails: 30, msgs: 165, leads: 22, converted: 5, location: "Canada" },
-      { date: "2026-02-22", campaign: "SaaS Founder Outreach", channel: "Email", domain: "foundergrid.com", emails: 110, msgs: 146, leads: 18, converted: 3, location: "Germany" },
-      { date: "2026-02-26", campaign: "Enterprise Pilot Push", channel: "Email", domain: "b2bcentral.org", emails: 155, msgs: 189, leads: 29, converted: 6, location: "UAE" },
-      { date: "2026-03-02", campaign: "AI Ops Outreach", channel: "LinkedIn", domain: "infraops.net", emails: 65, msgs: 218, leads: 38, converted: 10, location: "India" },
-      { date: "2026-03-04", campaign: "SaaS Founder Outreach", channel: "Email", domain: "saas.io", emails: 105, msgs: 137, leads: 16, converted: 2, location: "USA" },
-      { date: "2026-03-05", campaign: "Enterprise Pilot Push", channel: "Email", domain: "enterpriseworks.com", emails: 165, msgs: 208, leads: 35, converted: 9, location: "Singapore" }
-    ];
+    let data = [];
     const competitorAvg = 18.5;
+
+    async function fetchData() {
+      try {
+        const res = await fetch("/api/dashboard/stats");
+        if (!res.ok) throw new Error("Failed to fetch dash stats");
+        data = await res.json();
+        
+        initFilters();
+        render();
+      } catch (err) {
+        console.error("Dashboard init error:", err);
+      }
+    }
 
     const els = {
       channel: document.getElementById("filter-channel"),
@@ -223,6 +225,10 @@
     function uniq(arr) { return [...new Set(arr)]; }
 
     function initFilters() {
+      // Clear existing dynamic options (keep 'All')
+      els.channel.innerHTML = '<option value="all">All</option>';
+      els.campaign.innerHTML = '<option value="all">All</option>';
+      
       uniq(data.map(d => d.channel)).forEach(v => {
         const opt = document.createElement("option");
         opt.value = v; opt.textContent = v; els.channel.appendChild(opt);
@@ -399,8 +405,7 @@
       node.addEventListener("input", render);
     });
 
-    initFilters();
-    render();
+    fetchData();
   </script>
 </body>
 </html>
