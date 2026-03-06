@@ -1,0 +1,594 @@
+PRODUCT REQUIREMENTS DOCUMENT (PRD)
+
+Product Name:
+OutreachFlow AI – Intelligent Outreach Workflow Automation Engine
+
+Version:
+V1 – Hackathon Prototype
+
+Track:
+Sales & Outreach Systems
+
+--------------------------------------------------
+
+1. PRODUCT OVERVIEW
+
+OutreachFlow AI is a workflow‑driven automation platform that allows businesses to automate personalized outreach campaigns using AI‑generated messaging and configurable workflow logic.
+
+The system allows users to:
+
+• Upload or generate lead datasets
+• Configure outreach workflows
+• Generate personalized AI emails
+• Automate follow-up sequences
+• Monitor campaign performance through analytics dashboards
+• Receive insights to improve conversion rates
+
+--------------------------------------------------
+
+2. PRODUCT OBJECTIVE
+
+The platform aims to reduce manual outreach effort and provide a unified system for lead management, AI-driven outreach, and campaign performance monitoring.
+
+Key Capabilities
+
+• AI powered outreach generation
+• Workflow based automation
+• Lead management
+• Conversion analytics
+• Risk analysis and optimization insights
+
+--------------------------------------------------
+
+3. HIGH LEVEL USER FLOW
+
+Landing Page
+↓
+User Campaign Setup
+↓
+Lead Data Input
+↓
+Workflow Selection
+↓
+Workflow Execution
+↓
+Analytics Dashboard
+
+--------------------------------------------------
+
+==================================================
+STAGE 1 — LANDING PAGE + USER CONTEXT CAPTURE
+==================================================
+
+Objective:
+Capture campaign context before initiating automation.
+
+-------------------------------------
+
+Stage 1 Implementation Steps
+
+Step 1: Build Minimal Landing Page
+
+Frontend Components
+
+• Product title
+• Short description
+• CTA button
+
+CTA Button:
+
+Start Automation
+
+Action:
+Redirects to Campaign Setup Page.
+
+-------------------------------------
+
+Step 2: Campaign Setup Form
+
+Form Fields
+
+Industry (Dropdown)
+
+Company Name (Text Input)
+
+Product / Service Description (Text Area)
+
+Target Customer Type (Dropdown)
+
+Target Geography (Optional)
+
+Preferred Outreach Channel
+Email (V1)
+
+Campaign Goal
+
+Options:
+
+• Lead Generation
+• Sales Prospecting
+• Partnership Outreach
+• Recruitment Outreach
+
+-------------------------------------
+
+Step 3: Form Submission Handling
+
+Frontend
+
+• Validate required inputs
+• Send campaign data to backend
+
+Backend
+
+• Create campaign context object
+• Store context in local storage
+
+Example Object
+
+{
+industry: "SaaS",
+company_name: "XYZ AI",
+product_description: "AI CRM Automation",
+target_customer: "Startups",
+region: "Global",
+campaign_goal: "Sales Prospecting"
+}
+
+Output of Stage 1
+
+Campaign Context Ready
+
+--------------------------------------------------
+
+==================================================
+STAGE 2 — CAMPAIGN INTENT + PROMPT GENERATION
+==================================================
+
+Objective:
+Collect the user's campaign goals, targeting intent, and personalization instructions.  
+Use this information to generate personalized outreach email templates using Gemini.  
+The AI must return emails strictly in CSV format containing subject and body fields.
+
+--------------------------------------------------
+Stage 2 Implementation
+--------------------------------------------------
+
+Step 1: Campaign Intent Form
+
+Users must fill a structured form describing their outreach campaign.
+
+Fields:
+
+1. Campaign Name
+Text Input
+Example:
+AI SaaS Founder Outreach
+
+2. Target Audience
+Text Input
+Example:
+Startup founders in SaaS companies
+
+3. Product / Service Description
+Text Area
+Example:
+AI powered customer support automation platform.
+
+4. Value Proposition
+Text Area
+Example:
+Reduce customer support workload by 60% using AI agents.
+
+5. Goal of Outreach
+Dropdown Options:
+- Book a Demo
+- Schedule a Call
+- Partnership
+- Sales Outreach
+- Networking
+- Custom
+
+6. Personalization Variables
+Multi-select checkboxes:
+
+- First Name
+- Company Name
+- Job Title
+- Industry
+- Recent Achievement
+- Location
+
+These will be used as placeholders in the generated emails:
+
+{{first_name}}
+{{company}}
+{{job_title}}
+{{industry}}
+
+--------------------------------------------------
+
+Step 2: Email Prompt Builder
+
+Below the campaign form, display a Prompt Section where the user defines how the AI should generate emails.
+
+Field:
+
+AI Email Generation Prompt
+Text Area
+
+Description:
+The user writes instructions describing tone, style, and structure of the outreach email.
+
+Example Prompt:
+
+Write a short personalized cold email.
+
+Tone: Friendly and professional  
+Goal: Book a 15 minute demo  
+Audience: SaaS founders  
+
+Use personalization with first name and company name.  
+Keep the email under 120 words.  
+Include a clear call-to-action asking for a quick meeting.
+
+--------------------------------------------------
+
+Step 3: Generate Emails Button
+
+Button Label:
+Generate Personalized Emails
+
+When clicked:
+
+1. The system compiles:
+   - Campaign Intent Form Data
+   - Prompt
+   - Selected Personalization Variables
+
+2. A structured request is sent to Gemini API.
+
+--------------------------------------------------
+
+Step 4: Gemini Response Format (Strict)
+
+Gemini must return ONLY CSV.
+
+Format:
+
+subject,body
+
+Example:
+
+subject,body
+Quick idea for {{company}},Hi {{first_name}}, I noticed {{company}} is growing quickly. We built an AI tool that helps SaaS teams automate up to 60% of support requests. Thought it might be useful for your team. Would you be open to a quick 15 minute demo this week?
+AI support automation for {{company}},Hi {{first_name}}, I came across {{company}} and saw the amazing work your team is doing. We help SaaS companies reduce support workload with AI agents. Happy to show how it works if you're interested.
+
+--------------------------------------------------
+
+Step 5: Output Preview UI
+
+Display the generated emails in a table.
+
+Columns:
+Subject | Email Body
+
+Example:
+
+Subject: Quick idea for {{company}}
+Body: Hi {{first_name}}, I noticed {{company}} is growing quickly...
+
+Subject: AI support automation for {{company}}
+Body: Hi {{first_name}}, I came across {{company}} and saw the amazing work...
+
+Actions Available:
+
+- Regenerate Emails
+- Edit Prompt
+- Download CSV
+- Continue to Stage 3
+
+--------------------------------------------------
+
+Step 6: Data Passed to Stage 3
+
+The following data is passed to the Outreach Workflow Engine:
+
+campaign_name
+target_audience
+product_description
+value_proposition
+campaign_goal
+personalization_variables
+prompt
+generated_email_subjects
+generated_email_bodies
+
+--------------------------------------------------
+
+UX Flow Summary
+
+Stage 1 → Lead Upload
+Stage 2 → Campaign Intent + Prompt + AI Email Generation
+Stage 3 → Outreach Workflow Engine
+Stage 4 → Automated Sending + Tracking
+
+--------------------------------------------------
+
+==================================================
+STAGE 3 — OUTREACH WORKFLOW ENGINE
+==================================================
+
+Objective:
+Allow users to select or design outreach workflows.
+
+-------------------------------------
+
+Stage 3 Implementation Steps
+
+Step 1: Workflow Selection Page
+
+User chooses one of three options.
+
+Template 1
+Standard Outreach Sequence
+
+Template 2
+High Conversion Outreach
+
+Template 3
+Custom Workflow Builder
+
+-------------------------------------
+
+TEMPLATE 1 — STANDARD OUTREACH
+
+Workflow Structure
+
+Email Introduction
+↓
+Wait 3 Days
+↓
+Follow-up Email
+↓
+Wait 5 Days
+↓
+Final Reminder
+
+Implementation
+
+Backend executes sequential actions for each lead.
+
+-------------------------------------
+
+TEMPLATE 2 — HIGH CONVERSION
+
+Workflow
+
+Initial Email
+↓
+Follow-up (2 days)
+↓
+Value Proposition Email
+↓
+Final Reminder
+
+This workflow prioritizes faster engagement.
+
+-------------------------------------
+
+TEMPLATE 3 — CUSTOM DRAG‑AND‑DROP WORKFLOW
+
+Frontend
+
+Drag-and-drop interface for workflow design.
+
+Workflow Nodes
+
+Send Email
+Wait Delay
+Condition Check
+Follow-up Message
+End Workflow
+
+Example Workflow
+
+Send Email
+↓
+Wait 2 Days
+↓
+If Email Opened
+
+Yes → Send Follow-up
+
+No → Send Reminder
+
+-------------------------------------
+
+Step 2: AI Email Personalization
+
+Inputs
+
+Lead Name
+Company Name
+Industry
+Product Description
+Campaign Goal
+
+AI generates:
+
+• Email Subject
+• Email Body
+
+Example
+
+Subject
+Quick idea for {Company}
+
+Body
+
+Hi {Name},
+
+I came across {Company} while researching the {Industry} sector.
+
+We help companies streamline operations using AI-powered automation.
+
+Would you be open to a quick conversation?
+
+-------------------------------------
+
+Step 3: Workflow Execution Engine
+
+Backend logic
+
+For each lead:
+
+1 Load workflow template
+2 Generate personalized message
+3 Execute outreach action
+4 Apply delay logic
+5 Update lead status
+6 Log campaign activity
+
+-------------------------------------
+
+Safety Controls
+
+• Email sending limits
+• Randomized delay
+• Spam protection
+
+--------------------------------------------------
+
+==================================================
+STAGE 4 — ANALYTICS DASHBOARD
+==================================================
+
+Objective:
+Provide visibility into campaign performance and insights.
+
+-------------------------------------
+
+Stage 4 Implementation Steps
+
+Step 1: Campaign Metrics Dashboard
+
+Display metrics
+
+Total Leads
+
+Emails Sent
+
+Open Rate
+
+Reply Rate
+
+Conversion Rate
+
+-------------------------------------
+
+Step 2: Conversion Funnel Visualization
+
+Leads
+↓
+Emails Sent
+↓
+Emails Opened
+↓
+Replies
+↓
+Converted Leads
+
+-------------------------------------
+
+Step 3: Risk Analysis Engine
+
+System detects potential issues.
+
+Examples
+
+• Low open rate
+• High bounce rate
+• Spam risk
+• Too many emails sent
+
+-------------------------------------
+
+Step 4: AI Optimization Insights
+
+System generates improvement suggestions.
+
+Example
+
+"Open rate is low. Improve subject line personalization."
+
+"Leads from SaaS companies show higher response rates. Increase targeting."
+
+--------------------------------------------------
+
+5. TECH STACK
+
+Frontend
+
+HTML
+Tailwind CSS
+Bootstrap
+JavaScript
+
+Backend
+
+Python
+
+Framework
+
+Flask or FastAPI
+
+Libraries
+
+Pandas
+Requests
+JSON
+
+--------------------------------------------------
+
+6. DATA STORAGE
+
+The system stores all data locally.
+
+Storage Methods
+
+Browser Local Storage
+Local JSON files
+
+Example Files
+
+campaign_data.json
+leads_data.json
+workflow_config.json
+email_logs.json
+analytics_data.json
+
+--------------------------------------------------
+
+7. SUCCESS METRICS
+
+Lead Processing Time < 5 seconds
+
+Email Generation Time < 2 seconds
+
+Dashboard Refresh < 3 seconds
+
+Workflow Execution Reliability > 95%
+
+--------------------------------------------------
+
+8. LIMITATIONS (V1)
+
+• Email sending may be simulated
+• Lead generation may use mock datasets
+• Limited workflow node types
+• Local storage limits scalability
+
+--------------------------------------------------
+
+END OF DOCUMENT

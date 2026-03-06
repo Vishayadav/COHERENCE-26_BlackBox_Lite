@@ -58,8 +58,8 @@ function renderSummary() {
       .map(
         (field) => `
         <div>
-          <span class="text-surface-500 text-xs">${field.label}</span>
-          <p class="text-white font-medium">${field.value || "-"}</p>
+          <span class="text-surface-500 text-xs font-semibold">${field.label}</span>
+          <p class="text-black font-bold">${field.value || "-"}</p>
         </div>
       `
       )

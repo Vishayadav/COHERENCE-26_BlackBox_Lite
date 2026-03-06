@@ -75,5 +75,49 @@
     "campaign_goal": "Sales Prospecting",
     "created_at": "2026-03-06T11:41:20.521471+00:00",
     "updated_at": "2026-03-06T11:41:20.521471+00:00"
+  },
+  {
+    "industry": "Healthcare",
+    "company_name": "Acme Vorp",
+    "product_description": "Jisndknwk",
+    "target_customer": "Enterprises",
+    "target_geography": "North America, Europe",
+    "outreach_channel": "Email",
+    "campaign_goal": "Sales Prospecting",
+    "created_at": "2026-03-06T12:05:07.489418+00:00",
+    "updated_at": "2026-03-06T12:05:07.489418+00:00"
+  },
+  {
+    "industry": "Healthcare",
+    "company_name": "Acme Vorp",
+    "product_description": "Jisndknwk",
+    "target_customer": "Enterprises",
+    "target_geography": "North America, Europe",
+    "outreach_channel": "Email",
+    "campaign_goal": "Sales Prospecting",
+    "created_at": "2026-03-06T12:06:24.275199+00:00",
+    "updated_at": "2026-03-06T12:06:24.275199+00:00"
+  },
+  {
+    "industry": "Healthcare",
+    "company_name": "Acme Vorp",
+    "product_description": "selling phones",
+    "target_customer": "Enterprises",
+    "target_geography": "North America, Europe",
+    "outreach_channel": "Email",
+    "campaign_goal": "Sales Prospecting",
+    "created_at": "2026-03-06T12:56:36.538635+00:00",
+    "updated_at": "2026-03-06T12:56:36.538635+00:00"
+  },
+  {
+    "industry": "Healthcare",
+    "company_name": "Acme Vorp",
+    "product_description": "selling phones",
+    "target_customer": "Enterprises",
+    "target_geography": "North America, Europe",
+    "outreach_channel": "Email",
+    "campaign_goal": "Sales Prospecting",
+    "created_at": "2026-03-06T13:01:17.943077+00:00",
+    "updated_at": "2026-03-06T13:01:17.943077+00:00"
   }
 ]

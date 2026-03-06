@@ -490,3 +490,29 @@ html {
 .fade-in-section.is-visible {
     animation-play-state: running;
 }
+/* Shimmer Animation for loading states */
+@keyframes shimmer {
+    0% { transform: translateX(-150%); }
+    100% { transform: translateX(150%); }
+}
+
+.animate-shimmer {
+    animation: shimmer 2s infinite;
+}
+
+/* Glassmorphism Sidebar */
+#refine-sidebar {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-left: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+/* Card Hover Effects */
+.lead-card-transition {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.lead-card-transition:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px -10px rgba(0, 0, 0, 0.08);
+}
